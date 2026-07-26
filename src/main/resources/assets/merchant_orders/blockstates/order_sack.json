@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "merchant_orders:block/order_sack"
+    }
+  }
+}

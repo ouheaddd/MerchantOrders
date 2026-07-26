@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "merchant_orders:block/order_terminal"
+    },
+    "facing=south": {
+      "model": "merchant_orders:block/order_terminal",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "merchant_orders:block/order_terminal",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "merchant_orders:block/order_terminal",
+      "y": 90
+    }
+  }
+}

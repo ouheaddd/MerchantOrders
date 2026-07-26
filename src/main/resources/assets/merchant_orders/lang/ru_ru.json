@@ -1,0 +1,21 @@
+{
+  "block.merchant_orders.order_terminal": "Торговый почтомат",
+  "block.merchant_orders.order_sack": "Мешок с заказом",
+  "item.merchant_orders.order_sack": "Мешок с заказом",
+  "container.merchant_orders.order_terminal": "Торговый почтомат",
+  "container.merchant_orders.order_sack": "Мешок с заказом",
+  "creative_tab.merchant_orders.main": "Merchant Orders",
+  "screen.merchant_orders.level": "Уровень %s",
+  "tooltip.merchant_orders.claim": "Забрать заказ (%s предметов)",
+  "tooltip.merchant_orders.empty_basket": "Корзина пуста",
+  "message.merchant_orders.inventory_full": "Освободите один слот в инвентаре.",
+  "subtitles.merchant_orders.order_add": "Товар упакован",
+  "subtitles.merchant_orders.order_claim": "Заказ получен",
+  "screen.merchant_orders.tier.0": "Новичок",
+  "screen.merchant_orders.tier.1": "Подмастерье",
+  "screen.merchant_orders.tier.2": "Ремесленник",
+  "screen.merchant_orders.tier.3": "Эксперт",
+  "screen.merchant_orders.tier.4": "Мастер",
+  "tooltip.merchant_orders.tier_locked": "Недоступно — требуется %s опыта",
+  "tooltip.merchant_orders.tier_open": "Открытый уровень: %s"
+}

@@ -1,0 +1,14 @@
+{
+  "ui.order_add": {
+    "subtitle": "subtitles.merchant_orders.order_add",
+    "sounds": [
+      "merchant_orders:ui/order_add"
+    ]
+  },
+  "ui.order_claim": {
+    "subtitle": "subtitles.merchant_orders.order_claim",
+    "sounds": [
+      "merchant_orders:ui/order_claim"
+    ]
+  }
+}

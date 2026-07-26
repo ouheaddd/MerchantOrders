@@ -1,0 +1,21 @@
+{
+  "block.merchant_orders.order_terminal": "Торговий поштомат",
+  "block.merchant_orders.order_sack": "Мішок із замовленням",
+  "item.merchant_orders.order_sack": "Мішок із замовленням",
+  "container.merchant_orders.order_terminal": "Торговий поштомат",
+  "container.merchant_orders.order_sack": "Мішок із замовленням",
+  "creative_tab.merchant_orders.main": "Merchant Orders",
+  "screen.merchant_orders.level": "Рівень %s",
+  "tooltip.merchant_orders.claim": "Забрати замовлення (%s предметів)",
+  "tooltip.merchant_orders.empty_basket": "Кошик порожній",
+  "message.merchant_orders.inventory_full": "Звільніть один слот в інвентарі.",
+  "subtitles.merchant_orders.order_add": "Товар запаковано",
+  "subtitles.merchant_orders.order_claim": "Замовлення отримано",
+  "screen.merchant_orders.tier.0": "Новачок",
+  "screen.merchant_orders.tier.1": "Підмайстер",
+  "screen.merchant_orders.tier.2": "Ремісник",
+  "screen.merchant_orders.tier.3": "Експерт",
+  "screen.merchant_orders.tier.4": "Майстер",
+  "tooltip.merchant_orders.tier_locked": "Недоступно — потрібно %s досвіду",
+  "tooltip.merchant_orders.tier_open": "Відкритий рівень: %s"
+}

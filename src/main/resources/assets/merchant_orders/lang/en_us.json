@@ -1,0 +1,21 @@
+{
+  "block.merchant_orders.order_terminal": "Order Terminal",
+  "block.merchant_orders.order_sack": "Order Sack",
+  "item.merchant_orders.order_sack": "Order Sack",
+  "container.merchant_orders.order_terminal": "Merchant Orders",
+  "container.merchant_orders.order_sack": "Order Sack",
+  "creative_tab.merchant_orders.main": "Merchant Orders",
+  "screen.merchant_orders.level": "Tier %s",
+  "tooltip.merchant_orders.claim": "Claim order (%s items)",
+  "tooltip.merchant_orders.empty_basket": "Basket is empty",
+  "message.merchant_orders.inventory_full": "Free one inventory slot first.",
+  "subtitles.merchant_orders.order_add": "Item packed",
+  "subtitles.merchant_orders.order_claim": "Order claimed",
+  "screen.merchant_orders.tier.0": "Novice",
+  "screen.merchant_orders.tier.1": "Apprentice",
+  "screen.merchant_orders.tier.2": "Journeyman",
+  "screen.merchant_orders.tier.3": "Expert",
+  "screen.merchant_orders.tier.4": "Master",
+  "tooltip.merchant_orders.tier_locked": "Locked — requires %s XP",
+  "tooltip.merchant_orders.tier_open": "Open tier: %s"
+}

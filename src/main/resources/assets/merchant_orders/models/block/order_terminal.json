@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "merchant_orders:block/order_terminal_front",
+    "side": "merchant_orders:block/order_terminal_side",
+    "top": "merchant_orders:block/order_terminal_top"
+  }
+}
