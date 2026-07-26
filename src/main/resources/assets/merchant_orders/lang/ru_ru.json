@@ -17,5 +17,12 @@
   "screen.merchant_orders.tier.3": "Эксперт",
   "screen.merchant_orders.tier.4": "Мастер",
   "tooltip.merchant_orders.tier_locked": "Недоступно — требуется %s опыта",
-  "tooltip.merchant_orders.tier_open": "Открытый уровень: %s"
+  "tooltip.merchant_orders.tier_open": "Открытый уровень: %s",
+  "screen.merchant_orders.current_trade": "Текущая сделка",
+  "screen.merchant_orders.order_basket": "Корзина",
+  "screen.merchant_orders.add_to_order": "Добавить в заказ",
+  "screen.merchant_orders.add_all_to_order": "Добавить максимум",
+  "tooltip.merchant_orders.add_to_order": "Нажмите для одной покупки. Удерживайте Shift для максимума.",
+  "screen.merchant_orders.send_order": "Отправить заказ",
+  "tooltip.merchant_orders.send_order": "Нажмите, чтобы упаковать корзину в мешок с заказом."
 }

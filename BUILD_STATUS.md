@@ -2,18 +2,22 @@
 
 ## Completed in this environment
 
-- Project and Gradle layout created for NeoForge 1.21.1 / Java 21.
-- Client/common/core/mixin structure created from the supplied reference style.
-- Source-level syntax scan completed.
-- JSON resources parsed successfully.
-- PNG resources decoded and dimensions checked.
-- OGG placeholder sounds inspected.
-- Required metadata, models, blockstates, loot tables, recipes, languages, and mixin config checked.
-- Gradle bootstrap delegation tested against a local fake distribution.
-- Archive integrity check completed.
+- Applied the NeoForge 1.21.1 villager API corrections in `TradePoolRegistry`:
+  - `VillagerProfession` uses `net.minecraft.world.entity.npc`;
+  - `VillagerTradesEvent#getType()` is treated as a `VillagerProfession`;
+  - `ItemListing#getOffer` is called with `Entity` and `RandomSource`.
+- Removed all hardcoded fallback trade products.
+- Rebuilt the terminal GUI layout and synchronized slot coordinates.
+- Expanded the order basket and sack to 36 slots.
+- Enabled normal item insertion into item-backed and block-backed sacks.
+- Added nested-sack and shulker-box rejection rules.
+- Parsed every JSON resource successfully.
+- Validated all PNG and OGG file signatures.
+- Verified the Gradle wrapper JAR and required project structure.
+- Created a clean source archive.
 
-## Environment limitation
+## Gradle build attempt
 
-A full NeoForge `gradlew build` and in-game `runClient` launch require the Gradle, NeoForge, Minecraft, and mapping dependencies to be downloaded. The execution sandbox used to assemble this project cannot resolve external Maven/Gradle hosts and did not contain those dependencies in a local cache. Because of that, no compiled JAR is included and no claim is made that an actual game launch was completed here.
+`./gradlew clean build --no-daemon` was started with Java 21. The wrapper could not download Gradle because this execution environment cannot resolve `services.gradle.org` and has no local Gradle/NeoForge dependency cache.
 
-The project includes the Gradle bootstrap files. Run `gradlew.bat clean build` on Windows or `./gradlew clean build` on Linux/macOS with Java 21 and an internet connection. Any API-level compile issue that only NeoForge's dependency classpath can expose should be treated as the next verification step.
+Because the NeoForge dependency classpath could not be downloaded here, no compiled JAR is included and an actual `runClient` launch was not possible in this environment. Run `gradlew.bat clean build` on a normal internet-connected Windows setup to perform the final compiler and game-launch verification.

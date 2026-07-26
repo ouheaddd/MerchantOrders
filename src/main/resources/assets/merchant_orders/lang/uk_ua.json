@@ -17,5 +17,12 @@
   "screen.merchant_orders.tier.3": "Експерт",
   "screen.merchant_orders.tier.4": "Майстер",
   "tooltip.merchant_orders.tier_locked": "Недоступно — потрібно %s досвіду",
-  "tooltip.merchant_orders.tier_open": "Відкритий рівень: %s"
+  "tooltip.merchant_orders.tier_open": "Відкритий рівень: %s",
+  "screen.merchant_orders.current_trade": "Поточна угода",
+  "screen.merchant_orders.order_basket": "Кошик",
+  "screen.merchant_orders.add_to_order": "Додати до замовлення",
+  "screen.merchant_orders.add_all_to_order": "Додати максимум",
+  "tooltip.merchant_orders.add_to_order": "Натисніть для однієї покупки. Утримуйте Shift для максимуму.",
+  "screen.merchant_orders.send_order": "Відправити замовлення",
+  "tooltip.merchant_orders.send_order": "Натисніть, щоб запакувати кошик у мішок із замовленням."
 }

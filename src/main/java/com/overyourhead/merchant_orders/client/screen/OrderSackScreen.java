@@ -17,8 +17,8 @@ public final class OrderSackScreen extends AbstractContainerScreen<OrderSackMenu
     public OrderSackScreen(OrderSackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = 176;
-        imageHeight = 150;
-        inventoryLabelY = 56;
+        imageHeight = 186;
+        inventoryLabelY = 92;
     }
 
     @Override

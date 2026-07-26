@@ -1,6 +1,7 @@
 package com.overyourhead.merchant_orders.common.block.entity;
 
 import com.overyourhead.merchant_orders.common.MOConstants;
+import com.overyourhead.merchant_orders.common.inventory.SackRules;
 import com.overyourhead.merchant_orders.common.menu.OrderSackMenu;
 import com.overyourhead.merchant_orders.core.registry.MOBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -47,12 +48,16 @@ public final class OrderSackBlockEntity extends RandomizableContainerBlockEntity
 
     @Override
     protected void setItems(NonNullList<ItemStack> items) {
-        this.items = items;
+        NonNullList<ItemStack> resized = NonNullList.withSize(MOConstants.BASKET_SIZE, ItemStack.EMPTY);
+        for (int i = 0; i < Math.min(items.size(), resized.size()); i++) {
+            resized.set(i, items.get(i));
+        }
+        this.items = resized;
     }
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return false;
+        return SackRules.canStore(stack);
     }
 
     public boolean hasAnyItem() {

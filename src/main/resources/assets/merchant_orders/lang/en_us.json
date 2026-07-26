@@ -17,5 +17,12 @@
   "screen.merchant_orders.tier.3": "Expert",
   "screen.merchant_orders.tier.4": "Master",
   "tooltip.merchant_orders.tier_locked": "Locked — requires %s XP",
-  "tooltip.merchant_orders.tier_open": "Open tier: %s"
+  "tooltip.merchant_orders.tier_open": "Open tier: %s",
+  "screen.merchant_orders.current_trade": "Current Trade",
+  "screen.merchant_orders.order_basket": "Basket",
+  "screen.merchant_orders.add_to_order": "Add to Order",
+  "screen.merchant_orders.add_all_to_order": "Add All to Order",
+  "tooltip.merchant_orders.add_to_order": "Click to buy once. Hold Shift to buy as many as possible.",
+  "screen.merchant_orders.send_order": "Send Order",
+  "tooltip.merchant_orders.send_order": "Click to pack the basket into an order sack."
 }

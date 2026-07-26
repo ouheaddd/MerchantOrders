@@ -1,6 +1,7 @@
 package com.overyourhead.merchant_orders.common.inventory;
 
 import com.overyourhead.merchant_orders.common.MOConstants;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
@@ -14,8 +15,12 @@ public final class SackItemContainer extends SimpleContainer {
         super(MOConstants.BASKET_SIZE);
         this.sackStack = sackStack;
         this.loading = true;
-        ItemContainerContents contents = sackStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-        net.minecraft.core.NonNullList<ItemStack> loaded = net.minecraft.core.NonNullList.withSize(MOConstants.BASKET_SIZE, ItemStack.EMPTY);
+
+        ItemContainerContents contents = sackStack.getOrDefault(
+                DataComponents.CONTAINER,
+                ItemContainerContents.EMPTY
+        );
+        NonNullList<ItemStack> loaded = NonNullList.withSize(MOConstants.BASKET_SIZE, ItemStack.EMPTY);
         contents.copyInto(loaded);
         for (int i = 0; i < MOConstants.BASKET_SIZE; i++) {
             setItem(i, loaded.get(i).copy());
@@ -25,14 +30,14 @@ public final class SackItemContainer extends SimpleContainer {
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return false;
+        return SackRules.canStore(stack);
     }
 
     @Override
     public void setChanged() {
         super.setChanged();
         if (!loading) {
-            net.minecraft.core.NonNullList<ItemStack> saved = net.minecraft.core.NonNullList.withSize(MOConstants.BASKET_SIZE, ItemStack.EMPTY);
+            NonNullList<ItemStack> saved = NonNullList.withSize(MOConstants.BASKET_SIZE, ItemStack.EMPTY);
             for (int i = 0; i < MOConstants.BASKET_SIZE; i++) {
                 saved.set(i, getItem(i).copy());
             }

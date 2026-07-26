@@ -2,6 +2,7 @@ package com.overyourhead.merchant_orders.common.menu;
 
 import com.overyourhead.merchant_orders.common.MOConstants;
 import com.overyourhead.merchant_orders.common.inventory.SackItemContainer;
+import com.overyourhead.merchant_orders.common.inventory.SackRules;
 import com.overyourhead.merchant_orders.core.registry.MOBlocks;
 import com.overyourhead.merchant_orders.core.registry.MOMenuTypes;
 import net.minecraft.world.Container;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 public final class OrderSackMenu extends AbstractContainerMenu {
+    private static final int SACK_ROWS = 4;
     private static final int PLAYER_SLOT_BASE = MOConstants.BASKET_SIZE;
     private final Container container;
     private final ContainerLevelAccess access;
@@ -52,18 +54,18 @@ public final class OrderSackMenu extends AbstractContainerMenu {
         checkContainerSize(container, MOConstants.BASKET_SIZE);
         container.startOpen(playerInventory.player);
 
-        for (int row = 0; row < 2; row++) {
+        for (int row = 0; row < SACK_ROWS; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new OutputOnlySlot(container, column + row * 9, 8 + column * 18, 18 + row * 18));
+                addSlot(new SackSlot(container, column + row * 9, 8 + column * 18, 18 + row * 18));
             }
         }
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new LockedPlayerSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 68 + row * 18));
+                addSlot(new LockedPlayerSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 104 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new LockedPlayerSlot(playerInventory, column, 8 + column * 18, 126));
+            addSlot(new LockedPlayerSlot(playerInventory, column, 8 + column * 18, 162));
         }
     }
 
@@ -84,6 +86,7 @@ public final class OrderSackMenu extends AbstractContainerMenu {
         if (slot == null || !slot.hasItem()) {
             return ItemStack.EMPTY;
         }
+
         ItemStack source = slot.getItem();
         ItemStack copy = source.copy();
         if (slotIndex < PLAYER_SLOT_BASE) {
@@ -91,8 +94,12 @@ public final class OrderSackMenu extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
         } else {
-            return ItemStack.EMPTY;
+            if (!SackRules.canStore(source)
+                    || !moveItemStackTo(source, 0, PLAYER_SLOT_BASE, false)) {
+                return ItemStack.EMPTY;
+            }
         }
+
         if (source.isEmpty()) {
             slot.set(ItemStack.EMPTY);
         } else {
@@ -106,9 +113,6 @@ public final class OrderSackMenu extends AbstractContainerMenu {
         if (!itemBacked) {
             return stillValid(access, player, MOBlocks.ORDER_SACK.get());
         }
-        // The server-side item menu keeps a reference to its source stack. The
-        // matching hotbar slot is locked while open so the backing item cannot
-        // be moved/dropped during a component update.
         return lockedSackStack == null
                 || (!lockedSackStack.isEmpty() && lockedSackStack.is(MOBlocks.ORDER_SACK_ITEM.get()));
     }
@@ -130,14 +134,14 @@ public final class OrderSackMenu extends AbstractContainerMenu {
         }
     }
 
-    private static final class OutputOnlySlot extends Slot {
-        private OutputOnlySlot(Container container, int slot, int x, int y) {
+    private static final class SackSlot extends Slot {
+        private SackSlot(Container container, int slot, int x, int y) {
             super(container, slot, x, y);
         }
 
         @Override
         public boolean mayPlace(ItemStack stack) {
-            return false;
+            return SackRules.canStore(stack) && container.canPlaceItem(getContainerSlot(), stack);
         }
     }
 }
