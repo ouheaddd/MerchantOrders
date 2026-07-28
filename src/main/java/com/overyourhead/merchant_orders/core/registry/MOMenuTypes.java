@@ -3,6 +3,7 @@ package com.overyourhead.merchant_orders.core.registry;
 import com.overyourhead.merchant_orders.MerchantOrdersMod;
 import com.overyourhead.merchant_orders.common.menu.OrderSackMenu;
 import com.overyourhead.merchant_orders.common.menu.OrderTerminalMenu;
+import com.overyourhead.merchant_orders.common.menu.TradeCrateMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
@@ -16,6 +17,9 @@ public final class MOMenuTypes {
 
     public static final DeferredHolder<MenuType<?>, MenuType<OrderTerminalMenu>> ORDER_TERMINAL =
             MENU_TYPES.register("order_terminal", () -> new MenuType<>(OrderTerminalMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<TradeCrateMenu>> TRADE_CRATE =
+            MENU_TYPES.register("trade_crate", () -> new MenuType<>(TradeCrateMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
     public static final DeferredHolder<MenuType<?>, MenuType<OrderSackMenu>> ORDER_SACK =
             MENU_TYPES.register("order_sack", () -> new MenuType<>(OrderSackMenu::new, FeatureFlags.DEFAULT_FLAGS));

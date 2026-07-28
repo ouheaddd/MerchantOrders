@@ -4,6 +4,7 @@ import com.overyourhead.merchant_orders.MerchantOrdersMod;
 import com.overyourhead.merchant_orders.common.config.MOConfig;
 import com.overyourhead.merchant_orders.common.player.PlayerOrderData;
 import com.overyourhead.merchant_orders.common.trade.TradePoolRegistry;
+import com.overyourhead.merchant_orders.common.sale.PlayerSaleData;
 import com.overyourhead.merchant_orders.core.registry.MOBlocks;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -38,6 +39,7 @@ public final class CommonEvents {
     public static void onPlayerClone(PlayerEvent.Clone event) {
         if (event.getOriginal() instanceof ServerPlayer original && event.getEntity() instanceof ServerPlayer clone) {
             PlayerOrderData.copyPersistentData(original, clone);
+            PlayerSaleData.copy(original, clone);
         }
     }
 }

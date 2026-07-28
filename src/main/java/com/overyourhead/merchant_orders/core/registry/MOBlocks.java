@@ -3,6 +3,7 @@ package com.overyourhead.merchant_orders.core.registry;
 import com.overyourhead.merchant_orders.MerchantOrdersMod;
 import com.overyourhead.merchant_orders.common.block.OrderSackBlock;
 import com.overyourhead.merchant_orders.common.block.OrderTerminalBlock;
+import com.overyourhead.merchant_orders.common.block.TradeCrateBlock;
 import com.overyourhead.merchant_orders.common.item.OrderSackItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -26,6 +27,14 @@ public final class MOBlocks {
                     .noOcclusion())
     );
 
+    public static final DeferredBlock<TradeCrateBlock> TRADE_CRATE = BLOCKS.register(
+            "trade_crate",
+            () -> new TradeCrateBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0F)
+                    .sound(SoundType.WOOD))
+    );
+
     public static final DeferredBlock<OrderSackBlock> ORDER_SACK = BLOCKS.register(
             "order_sack",
             () -> new OrderSackBlock(BlockBehaviour.Properties.of()
@@ -38,6 +47,11 @@ public final class MOBlocks {
     public static final DeferredItem<Item> ORDER_TERMINAL_ITEM = MOItems.ITEMS.register(
             "order_terminal",
             () -> new BlockItem(ORDER_TERMINAL.get(), new Item.Properties())
+    );
+
+    public static final DeferredItem<Item> TRADE_CRATE_ITEM = MOItems.ITEMS.register(
+            "trade_crate",
+            () -> new BlockItem(TRADE_CRATE.get(), new Item.Properties())
     );
 
     public static final DeferredItem<OrderSackItem> ORDER_SACK_ITEM = MOItems.ITEMS.register(

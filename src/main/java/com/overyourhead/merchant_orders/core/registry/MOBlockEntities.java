@@ -3,6 +3,7 @@ package com.overyourhead.merchant_orders.core.registry;
 import com.overyourhead.merchant_orders.MerchantOrdersMod;
 import com.overyourhead.merchant_orders.common.block.entity.OrderSackBlockEntity;
 import com.overyourhead.merchant_orders.common.block.entity.OrderTerminalBlockEntity;
+import com.overyourhead.merchant_orders.common.block.entity.TradeCrateBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -16,6 +17,11 @@ public final class MOBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OrderTerminalBlockEntity>> ORDER_TERMINAL =
             BLOCK_ENTITY_TYPES.register("order_terminal", () -> BlockEntityType.Builder
                     .of(OrderTerminalBlockEntity::new, MOBlocks.ORDER_TERMINAL.get())
+                    .build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TradeCrateBlockEntity>> TRADE_CRATE =
+            BLOCK_ENTITY_TYPES.register("trade_crate", () -> BlockEntityType.Builder
+                    .of(TradeCrateBlockEntity::new, MOBlocks.TRADE_CRATE.get())
                     .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OrderSackBlockEntity>> ORDER_SACK =

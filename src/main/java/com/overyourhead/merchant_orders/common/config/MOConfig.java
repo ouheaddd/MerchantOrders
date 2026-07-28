@@ -35,6 +35,18 @@ public final class MOConfig {
             .comment("Safety cap for one shift-click batch purchase.")
             .defineInRange("maximumShiftClickTrades", 64, 1, 256);
 
+    public static final ModConfigSpec.IntValue PURCHASE_DELIVERY_DELAY_TICKS = BUILDER
+            .comment("Delay before a purchase sack appears beside the terminal.")
+            .defineInRange("purchaseDeliveryDelayTicks", 200, 1, 72_000);
+
+    public static final ModConfigSpec.IntValue SALE_DELIVERY_DELAY_TICKS = BUILDER
+            .comment("Delay before a payment sack appears beside the trade crate.")
+            .defineInRange("saleDeliveryDelayTicks", 200, 1, 72_000);
+
+    public static final ModConfigSpec.IntValue SALE_COOLDOWN_DAYS = BUILDER
+            .comment("Personal cooldown in Minecraft days between trade-crate sales.")
+            .defineInRange("saleCooldownDays", 3, 1, 365);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private MOConfig() {
@@ -46,5 +58,17 @@ public final class MOConfig {
 
     public static long restockTicks() {
         return RESTOCK_DAYS.get().longValue() * 24_000L;
+    }
+
+    public static int purchaseDeliveryDelayTicks() {
+        return PURCHASE_DELIVERY_DELAY_TICKS.get();
+    }
+
+    public static int saleDeliveryDelayTicks() {
+        return SALE_DELIVERY_DELAY_TICKS.get();
+    }
+
+    public static long saleCooldownTicks() {
+        return SALE_COOLDOWN_DAYS.get().longValue() * 24_000L;
     }
 }

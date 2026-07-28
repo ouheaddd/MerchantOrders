@@ -1,3 +1,15 @@
+## 1.1.0
+
+- Rebuilt the Trade Crate screen to match the approved two-column layout.
+- Added a visible 6x6 trade-storage grid and the complete 3x9 player inventory plus hotbar.
+- Expanded dynamic reward preview from 4 to 8 slots arranged as 4x2.
+- Replaced internal `value` display with an approximate emerald range.
+- Added batch grades and a daily offer refresh countdown.
+- Reduced the lower cooldown panel and kept delivery/cooldown status dynamic.
+- Split every visual element into replaceable modular PNG textures.
+- Preserved delayed physical sack delivery for purchases and sales.
+- Included the Level/ServerLevel ticker fixes for both delivery block entities.
+
 ## 1.0.4
 
 - Removed the separator line between Send Order and the player inventory.

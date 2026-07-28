@@ -2,6 +2,7 @@ package com.overyourhead.merchant_orders.common.menu;
 
 import com.overyourhead.merchant_orders.common.MOConstants;
 import com.overyourhead.merchant_orders.common.config.MOConfig;
+import com.overyourhead.merchant_orders.common.block.entity.OrderTerminalBlockEntity;
 import com.overyourhead.merchant_orders.common.player.PlayerOrderData;
 import com.overyourhead.merchant_orders.common.trade.StoredTrade;
 import com.overyourhead.merchant_orders.common.trade.TradePoolRegistry;
@@ -241,19 +242,24 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         if (serverPlayer == null || orderData == null || orderData.occupiedBasketSlots() == 0) {
             return false;
         }
-        if (playerInventory.getFreeSlot() < 0) {
-            serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.merchant_orders.inventory_full"), true);
+
+        ItemStack sack = orderData.createSackStack(new ItemStack(MOBlocks.ORDER_SACK_ITEM.get()));
+        final boolean[] scheduled = {false};
+        access.execute((level, pos) -> {
+            if (level.getBlockEntity(pos) instanceof OrderTerminalBlockEntity terminal) {
+                scheduled[0] = terminal.scheduleDelivery(sack, MOConfig.purchaseDeliveryDelayTicks());
+            }
+        });
+        if (!scheduled[0]) {
+            serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.merchant_orders.delivery_busy"), true);
             serverPlayer.playSound(SoundEvents.VILLAGER_NO, 0.7F, 1.0F);
             return false;
         }
 
-        ItemStack sack = orderData.createSackStack(new ItemStack(MOBlocks.ORDER_SACK_ITEM.get()));
-        if (!playerInventory.add(sack)) {
-            return false;
-        }
         orderData.clearBasket();
         orderData.save();
         serverPlayer.playSound(MOSoundEvents.ORDER_CLAIM.get(), 1.0F, 1.0F);
+        serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.merchant_orders.delivery_scheduled"), true);
         updateTrackedData();
         broadcastChanges();
         return true;

@@ -3,6 +3,7 @@ package com.overyourhead.merchant_orders.client;
 import com.overyourhead.merchant_orders.MerchantOrdersMod;
 import com.overyourhead.merchant_orders.client.screen.OrderSackScreen;
 import com.overyourhead.merchant_orders.client.screen.OrderTerminalScreen;
+import com.overyourhead.merchant_orders.client.screen.TradeCrateScreen;
 import com.overyourhead.merchant_orders.core.registry.MOMenuTypes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -17,6 +18,7 @@ public final class MOClientEvents {
     @SubscribeEvent
     public static void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register(MOMenuTypes.ORDER_TERMINAL.get(), OrderTerminalScreen::new);
+        event.register(MOMenuTypes.TRADE_CRATE.get(), TradeCrateScreen::new);
         event.register(MOMenuTypes.ORDER_SACK.get(), OrderSackScreen::new);
     }
 }

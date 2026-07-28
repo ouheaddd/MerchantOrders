@@ -20,6 +20,7 @@ public final class MOCreativeTabs {
                     .icon(() -> new ItemStack(MOBlocks.ORDER_TERMINAL.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(MOBlocks.ORDER_TERMINAL_ITEM.get());
+                        output.accept(MOBlocks.TRADE_CRATE_ITEM.get());
                         output.accept(MOBlocks.ORDER_SACK_ITEM.get());
                     })
                     .build()
