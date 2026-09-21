@@ -25,7 +25,7 @@ public final class MOConfig {
 
     public static final ModConfigSpec.IntValue CATALOG_REFRESH_DAYS = BUILDER
             .comment("Minecraft days before a player's deterministic catalog changes.")
-            .defineInRange("catalogRefreshDays", 7, 1, 365);
+            .defineInRange("catalogRefreshDays", 6, 1, 365);
 
     public static final ModConfigSpec.IntValue RESTOCK_DAYS = BUILDER
             .comment("Minecraft days before used offers restock.")

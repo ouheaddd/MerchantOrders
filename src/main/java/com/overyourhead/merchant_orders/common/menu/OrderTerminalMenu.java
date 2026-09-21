@@ -49,13 +49,16 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
     public static final int RESULT_SLOT = 2;
     public static final int CATALOG_SLOT_BASE = 3;
     public static final int CATALOG_SLOT_COUNT = MOConstants.OFFERS_PER_TIER * 3;
-    public static final int PLAYER_SLOT_BASE = CATALOG_SLOT_BASE + CATALOG_SLOT_COUNT;
+    public static final int BASKET_SLOT_BASE = CATALOG_SLOT_BASE + CATALOG_SLOT_COUNT;
+    public static final int BASKET_SLOT_COUNT = MOConstants.BASKET_SIZE;
+    public static final int PLAYER_SLOT_BASE = BASKET_SLOT_BASE + BASKET_SLOT_COUNT;
 
     private final Inventory playerInventory;
     private final ContainerLevelAccess access;
     private final SimpleContainer payment = new SimpleContainer(2);
     private final SimpleContainer result = new SimpleContainer(1);
     private final SimpleContainer catalogSync = new SimpleContainer(CATALOG_SLOT_COUNT);
+    private final SimpleContainer basketSync = new SimpleContainer(BASKET_SLOT_COUNT);
     private final SimpleContainerData trackedData = new SimpleContainerData(DATA_COUNT);
     private final @Nullable ServerPlayer serverPlayer;
     private final @Nullable PlayerOrderData orderData;
@@ -91,6 +94,9 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
 
         for (int i = 0; i < CATALOG_SLOT_COUNT; i++) {
             addSlot(new ReadOnlySlot(catalogSync, i, -1000, -1000));
+        }
+        for (int i = 0; i < BASKET_SLOT_COUNT; i++) {
+            addSlot(new ReadOnlySlot(basketSync, i, -1000, -1000));
         }
 
         addPlayerInventory(playerInventory);
@@ -131,6 +137,7 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         trackedData.set(DATA_SELECTED_OFFER, selectedOffer);
         trackedData.set(DATA_CATALOG_SIZE, catalog.size());
         if (orderData != null) {
+            syncBasketContents();
             trackedData.set(DATA_XP, orderData.xp());
             trackedData.set(DATA_UNLOCKED_TIER, MOConstants.unlockedTier(orderData.xp()));
             trackedData.set(DATA_BASKET_SLOTS, orderData.occupiedBasketSlots());
@@ -141,6 +148,15 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
                 trackedData.set(DATA_USES_BASE + i, uses);
                 trackedData.set(DATA_MAX_USES_BASE + i, maxUses);
             }
+        }
+    }
+
+    private void syncBasketContents() {
+        if (orderData == null) {
+            return;
+        }
+        for (int i = 0; i < BASKET_SLOT_COUNT; i++) {
+            basketSync.setItem(i, orderData.basket().get(i).copy());
         }
     }
 
@@ -358,6 +374,13 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
 
     public int basketItems() {
         return trackedData.get(DATA_BASKET_ITEMS);
+    }
+
+    public ItemStack getBasketItem(int slot) {
+        if (slot < 0 || slot >= BASKET_SLOT_COUNT) {
+            return ItemStack.EMPTY;
+        }
+        return basketSync.getItem(slot);
     }
 
     public int catalogSize() {

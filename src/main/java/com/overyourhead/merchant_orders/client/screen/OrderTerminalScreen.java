@@ -15,6 +15,8 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private static final ResourceLocation BACKGROUND = gui("order_terminal.png");
     private static final ResourceLocation CURRENT_TRADE_PANEL = gui("current_trade_panel.png");
     private static final ResourceLocation BASKET_PANEL = gui("basket_panel.png");
+    private static final ResourceLocation BASKET_PANEL_HOVER = gui("basket_panel_hover.png");
+    private static final ResourceLocation ORDER_BASKET = gui("order_basket.png");
     private static final ResourceLocation XP_BAR_BACKGROUND = gui("xp_bar_background.png");
     private static final ResourceLocation XP_BAR_FILL = gui("xp_bar_fill.png");
     private static final ResourceLocation TRADE_ROW = gui("trade_row.png");
@@ -59,6 +61,11 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private static final int BASKET_W = 71;
     private static final int BASKET_H = 81;
 
+    private static final int BASKET_PREVIEW_W = 176;
+    private static final int BASKET_PREVIEW_H = 96;
+    private static final int BASKET_PREVIEW_SLOT_X = 8;
+    private static final int BASKET_PREVIEW_SLOT_Y = 18;
+
     private static final int BUTTON_X = 196;
     private static final int BUTTON_Y = 113;
     private static final int BUTTON_W = 176;
@@ -72,6 +79,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private static final int XP_FILL_H = 5;
 
     private int scrollOffset;
+    private boolean basketOpen;
 
     private static ResourceLocation gui(String file) {
         return ResourceLocation.fromNamespaceAndPath(MerchantOrdersMod.MOD_ID, "textures/gui/" + file);
@@ -91,12 +99,15 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.blit(BACKGROUND, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
         blit(graphics, CURRENT_TRADE_PANEL, CURRENT_X, CURRENT_Y, CURRENT_W, CURRENT_H);
-        blit(graphics, BASKET_PANEL, BASKET_X, BASKET_Y, BASKET_W, BASKET_H);
+        boolean basketHovered = !basketOpen
+                && mouseX >= leftPos + BASKET_X && mouseX < leftPos + BASKET_X + BASKET_W
+                && mouseY >= topPos + BASKET_Y && mouseY < topPos + BASKET_Y + BASKET_H;
+        blit(graphics, basketHovered ? BASKET_PANEL_HOVER : BASKET_PANEL,
+                BASKET_X, BASKET_Y, BASKET_W, BASKET_H);
 
         renderTierTabs(graphics);
         renderProgressBar(graphics);
         renderTradeRows(graphics);
-        renderBasketCounters(graphics);
         renderOrderButton(graphics, mouseX, mouseY);
         renderScrollBar(graphics);
     }
@@ -180,17 +191,6 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         }
     }
 
-    private void renderBasketCounters(GuiGraphics graphics) {
-        int x = leftPos + BASKET_X;
-        int y = topPos + BASKET_Y;
-        boolean hasOrder = menu.basketSlots() > 0;
-        int color = hasOrder ? 0xFF4A3828 : 0xFF8A8176;
-
-        graphics.drawString(font, menu.basketSlots() + "/" + MOConstants.BASKET_SIZE, x + 6, y + 68, color, false);
-        String itemCount = Integer.toString(menu.basketItems());
-        graphics.drawString(font, itemCount, x + BASKET_W - 6 - font.width(itemCount), y + 68, color, false);
-    }
-
     private void renderOrderButton(GuiGraphics graphics, int mouseX, int mouseY) {
         int x = leftPos + BUTTON_X;
         int y = topPos + BUTTON_Y;
@@ -245,9 +245,71 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
+
+        // The basket is a modal preview. While it is open, render the terminal
+        // with an off-screen mouse position so underlying slots/buttons never
+        // receive hover state or appear interactive through the overlay.
+        int terminalMouseX = basketOpen ? -10_000 : mouseX;
+        int terminalMouseY = basketOpen ? -10_000 : mouseY;
+        super.render(graphics, terminalMouseX, terminalMouseY, partialTick);
+
+        if (basketOpen) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(0.0F, 0.0F, 500.0F);
+            graphics.fill(0, 0, width, height, 0x99000000);
+            graphics.pose().translate(0.0F, 0.0F, 10.0F);
+            renderBasketPreview(graphics);
+            renderBasketPreviewTooltip(graphics, mouseX, mouseY);
+            graphics.pose().popPose();
+            return;
+        }
+
         renderHoveredCatalogTooltip(graphics, mouseX, mouseY);
         renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    private void renderBasketPreview(GuiGraphics graphics) {
+        int x = basketPreviewX();
+        int y = basketPreviewY();
+        graphics.blit(ORDER_BASKET, x, y, 0, 0,
+                BASKET_PREVIEW_W, BASKET_PREVIEW_H, BASKET_PREVIEW_W, BASKET_PREVIEW_H);
+
+        for (int slot = 0; slot < MOConstants.BASKET_SIZE; slot++) {
+            ItemStack stack = menu.getBasketItem(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            int column = slot % 9;
+            int row = slot / 9;
+            int slotX = x + BASKET_PREVIEW_SLOT_X + column * 18;
+            int slotY = y + BASKET_PREVIEW_SLOT_Y + row * 18;
+            graphics.renderItem(stack, slotX, slotY);
+            graphics.renderItemDecorations(font, stack, slotX, slotY);
+        }
+    }
+
+    private void renderBasketPreviewTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        int relativeX = mouseX - basketPreviewX() - BASKET_PREVIEW_SLOT_X;
+        int relativeY = mouseY - basketPreviewY() - BASKET_PREVIEW_SLOT_Y;
+        if (relativeX < 0 || relativeY < 0 || relativeX >= 9 * 18 || relativeY >= 4 * 18) {
+            return;
+        }
+
+        int column = relativeX / 18;
+        int row = relativeY / 18;
+        ItemStack hovered = menu.getBasketItem(row * 9 + column);
+        if (!hovered.isEmpty()) {
+            graphics.renderTooltip(font, hovered, mouseX, mouseY);
+        }
+    }
+
+    private int basketPreviewX() {
+        return leftPos + (imageWidth - BASKET_PREVIEW_W) / 2;
+    }
+
+    private int basketPreviewY() {
+        return topPos + (imageHeight - BASKET_PREVIEW_H) / 2;
     }
 
     private void renderHoveredCatalogTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -298,8 +360,24 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (basketOpen) {
+            int previewX = basketPreviewX();
+            int previewY = basketPreviewY();
+            if (mouseX < previewX || mouseX >= previewX + BASKET_PREVIEW_W
+                    || mouseY < previewY || mouseY >= previewY + BASKET_PREVIEW_H) {
+                basketOpen = false;
+            }
+            return true;
+        }
+
         int x = (int) mouseX - leftPos;
         int y = (int) mouseY - topPos;
+
+        if (x >= BASKET_X && x < BASKET_X + BASKET_W
+                && y >= BASKET_Y && y < BASKET_Y + BASKET_H) {
+            basketOpen = true;
+            return true;
+        }
 
         if (x >= 274 && x < 292 && y >= 62 && y < 80) {
             sendButton(Screen.hasShiftDown()
@@ -334,7 +412,27 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     }
 
     @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (basketOpen) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (basketOpen) {
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (basketOpen) {
+            return true;
+        }
+
         int localX = (int) mouseX - leftPos;
         int localY = (int) mouseY - topPos;
         int maxOffset = Math.max(0, menu.catalogSize() - VISIBLE_ROWS);
@@ -345,6 +443,20 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (basketOpen) {
+            if (keyCode == 256
+                    || (minecraft != null && minecraft.options.keyInventory.matches(keyCode, scanCode))) {
+                basketOpen = false;
+            }
+            // Consume every other key as well (hotbar swaps, drop key, etc.) so
+            // the terminal underneath cannot be operated while the basket is open.
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private void sendButton(int id) {

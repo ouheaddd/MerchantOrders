@@ -8,6 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -52,6 +53,23 @@ public final class OrderTerminalBlockEntity extends BlockEntity implements MenuP
         deliveryTicks = Math.max(1, delayTicks);
         setChanged();
         return true;
+    }
+
+    public void dropPendingDelivery() {
+        if (pendingDelivery.isEmpty() || level == null || level.isClientSide) {
+            return;
+        }
+
+        Containers.dropItemStack(
+                level,
+                worldPosition.getX() + 0.5D,
+                worldPosition.getY() + 0.5D,
+                worldPosition.getZ() + 0.5D,
+                pendingDelivery.copy()
+        );
+        pendingDelivery = ItemStack.EMPTY;
+        deliveryTicks = 0;
+        setChanged();
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, OrderTerminalBlockEntity blockEntity) {
