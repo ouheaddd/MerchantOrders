@@ -1,8 +1,8 @@
 {
-  "block.merchant_orders.order_terminal": "Торговий поштомат",
+  "block.merchant_orders.order_terminal": "Дошка замовлень",
   "block.merchant_orders.order_sack": "Мішок із замовленням",
   "item.merchant_orders.order_sack": "Мішок із замовленням",
-  "container.merchant_orders.order_terminal": "Торговий поштомат",
+  "container.merchant_orders.order_terminal": "Дошка замовлень",
   "container.merchant_orders.order_sack": "Мішок із замовленням",
   "creative_tab.merchant_orders.main": "Merchant Orders",
   "screen.merchant_orders.level": "Рівень %s",

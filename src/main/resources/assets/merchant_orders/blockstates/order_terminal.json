@@ -1,19 +1,47 @@
 {
-  "variants": {
-    "facing=north": {
-      "model": "merchant_orders:block/order_terminal"
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "right": "false"
+      },
+      "apply": {
+        "model": "merchant_orders:block/order_terminal"
+      }
     },
-    "facing=south": {
-      "model": "merchant_orders:block/order_terminal",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "right": "false"
+      },
+      "apply": {
+        "model": "merchant_orders:block/order_terminal",
+        "y": 180
+      }
     },
-    "facing=west": {
-      "model": "merchant_orders:block/order_terminal",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "right": "false"
+      },
+      "apply": {
+        "model": "merchant_orders:block/order_terminal",
+        "y": 270
+      }
     },
-    "facing=east": {
-      "model": "merchant_orders:block/order_terminal",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "right": "false"
+      },
+      "apply": {
+        "model": "merchant_orders:block/order_terminal",
+        "y": 90
+      }
     }
-  }
+  ]
 }

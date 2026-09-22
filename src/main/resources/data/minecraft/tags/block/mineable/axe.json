@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    "merchant_orders:order_terminal"
+  ]
+}

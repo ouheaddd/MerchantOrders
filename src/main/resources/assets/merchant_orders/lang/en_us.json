@@ -1,8 +1,8 @@
 {
-  "block.merchant_orders.order_terminal": "Order Terminal",
+  "block.merchant_orders.order_terminal": "Order Board",
   "block.merchant_orders.order_sack": "Order Sack",
   "item.merchant_orders.order_sack": "Order Sack",
-  "container.merchant_orders.order_terminal": "Merchant Orders",
+  "container.merchant_orders.order_terminal": "Order Board",
   "container.merchant_orders.order_sack": "Order Sack",
   "creative_tab.merchant_orders.main": "Merchant Orders",
   "screen.merchant_orders.level": "Tier %s",

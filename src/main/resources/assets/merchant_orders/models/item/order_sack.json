@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "merchant_orders:item/order_sack"
-  }
+  "parent": "merchant_orders:block/order_sack"
 }

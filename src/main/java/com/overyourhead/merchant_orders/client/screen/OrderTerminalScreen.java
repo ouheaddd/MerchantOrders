@@ -108,6 +108,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         renderTierTabs(graphics);
         renderProgressBar(graphics);
         renderTradeRows(graphics);
+        renderBasketCounters(graphics);
         renderOrderButton(graphics, mouseX, mouseY);
         renderScrollBar(graphics);
     }
@@ -189,6 +190,19 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
                 graphics.fill(left + 2, top + 2, left + TRADE_W - 2, top + TRADE_H - 2, 0x66000000);
             }
         }
+    }
+
+    private void renderBasketCounters(GuiGraphics graphics) {
+        int x = leftPos + BASKET_X;
+        int y = topPos + BASKET_Y;
+        boolean hasOrder = menu.basketSlots() > 0;
+        int color = hasOrder ? 0xFF4A3828 : 0xFF8A8176;
+
+        String slots = menu.basketSlots() + "/" + MOConstants.BASKET_SIZE;
+        graphics.drawString(font, slots, x + 6, y + 68, color, false);
+
+        String itemCount = Integer.toString(menu.basketItems());
+        graphics.drawString(font, itemCount, x + BASKET_W - 6 - font.width(itemCount), y + 68, color, false);
     }
 
     private void renderOrderButton(GuiGraphics graphics, int mouseX, int mouseY) {

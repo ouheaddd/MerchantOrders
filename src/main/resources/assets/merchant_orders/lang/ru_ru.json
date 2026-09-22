@@ -1,8 +1,8 @@
 {
-  "block.merchant_orders.order_terminal": "Торговый почтомат",
+  "block.merchant_orders.order_terminal": "Доска заказов",
   "block.merchant_orders.order_sack": "Мешок с заказом",
   "item.merchant_orders.order_sack": "Мешок с заказом",
-  "container.merchant_orders.order_terminal": "Торговый почтомат",
+  "container.merchant_orders.order_terminal": "Доска заказов",
   "container.merchant_orders.order_sack": "Мешок с заказом",
   "creative_tab.merchant_orders.main": "Merchant Orders",
   "screen.merchant_orders.level": "Уровень %s",
