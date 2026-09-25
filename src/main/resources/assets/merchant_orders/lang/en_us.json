@@ -49,5 +49,9 @@
   "screen.merchant_orders.grade.normal": "Normal batch",
   "screen.merchant_orders.grade.valuable": "Valuable batch",
   "screen.merchant_orders.grade.very_valuable": "Very valuable batch",
-  "screen.merchant_orders.time_hours_minutes": "%s h %s min"
+  "screen.merchant_orders.time_hours_minutes": "%s h %s min",
+  "item.merchant_orders.order_board_debug_stick": "Order Board Debug Stick",
+  "message.merchant_orders.debug_board.none": "No Order Board found within %s blocks.",
+  "message.merchant_orders.debug_board.found": "Found %s Order Board(s) within %s blocks:",
+  "message.merchant_orders.debug_board.position": "Order Board: X=%s Y=%s Z=%s (%s blocks)"
 }

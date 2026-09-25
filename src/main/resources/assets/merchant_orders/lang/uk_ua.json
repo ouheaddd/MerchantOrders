@@ -49,5 +49,9 @@
   "screen.merchant_orders.grade.normal": "Звичайна партія",
   "screen.merchant_orders.grade.valuable": "Цінна партія",
   "screen.merchant_orders.grade.very_valuable": "Дуже цінна партія",
-  "screen.merchant_orders.time_hours_minutes": "%s год. %s хв."
+  "screen.merchant_orders.time_hours_minutes": "%s год. %s хв.",
+  "item.merchant_orders.order_board_debug_stick": "Налагоджувальна паличка дошки замовлень",
+  "message.merchant_orders.debug_board.none": "Дошку замовлень не знайдено в радіусі %s блоків.",
+  "message.merchant_orders.debug_board.found": "Знайдено дощок замовлень: %s (радіус %s блоків):",
+  "message.merchant_orders.debug_board.position": "Дошка замовлень: X=%s Y=%s Z=%s (%s блоків)"
 }

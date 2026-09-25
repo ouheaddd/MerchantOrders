@@ -1,1 +1,50 @@
-/time set day
+/locate structure minecraft:village_taiga
+/tp @s 39280 ~ 1696
+/locate structure minecraft:village_snowy
+/tp @s 39168 ~ 1168
+/locate structure minecraft:village_savanna
+/tp @s 39472 ~ -896
+/locate structure minecraft:village_desert
+/tp @s -272 ~ -800
+/locate structure minecraft:village_plains
+/tp @s 0 ~ -1776
+/locate structure minecraft:village_savanna
+/tp @s 16 ~ -2960
+/locate structure minecraft:village_snowy
+/tp @s -3456 ~ 128
+/locate structure minecraft:village_plains
+/tp @s -2896 ~ 1440
+/locate structure minecraft:village_desert
+/tp @s -4576 ~ 3376
+/locate structure minecraft:village_savanna
+/tp @s -4048 ~ 3088
+/locate structure minecraft:village_taiga
+/tp @s -5808 ~ 1152
+/locate structure minecraft:village_plains
+/tp @s -6928 ~ 80
+/locate structure minecraft:village_savanna
+/tp @s -8144 ~ -704
+/locate structure minecraft:village_desert
+/tp @s -9760 ~ -5360
+/locate structure minecraft:village_taiga
+/tp @s -11616 ~ -5696
+/locate structure minecraft:village_plains
+/tp @s -11168 ~ -5264
+/locate structure minecraft:village_snowy
+/tp @s -11728 ~ -6528
+/locate structure minecraft:village_snowy
+/tp @s -368 ~ 192
+/locate structure minecraft:village_taiga
+/tp @s -704 ~ 1424
+/locate structure minecraft:village_plains
+/tp @s -1088 ~ 3104
+/locate structure minecraft:village_desert
+/tp @s -3232 ~ 4688
+/locate structure minecraft:village_savanna
+/tp @s -2496 ~ 4000
+/locate structure minecraft:village_plains
+/tp @s -2992 ~ 3440
+/locate structure minecraft:village_snowy
+/tp @s -2432 ~ 2288
+/locate structure minecraft:village_taiga
+/tp @s -3184 ~ 1968

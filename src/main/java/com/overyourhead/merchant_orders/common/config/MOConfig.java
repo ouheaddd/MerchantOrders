@@ -13,7 +13,7 @@ public final class MOConfig {
 
     public static final ModConfigSpec.IntValue TERMINAL_PRICE = BUILDER
             .comment("Emerald cost of the order terminal from a wandering trader.")
-            .defineInRange("terminalPrice", 24, 1, 64);
+            .defineInRange("terminalPrice", 48, 1, 64);
 
     public static final ModConfigSpec.IntValue TERMINAL_MAX_USES = BUILDER
             .comment("Maximum purchases of the terminal offer per wandering trader.")
@@ -46,6 +46,42 @@ public final class MOConfig {
     public static final ModConfigSpec.IntValue SALE_COOLDOWN_DAYS = BUILDER
             .comment("Personal cooldown in Minecraft days between trade-crate sales.")
             .defineInRange("saleCooldownDays", 3, 1, 365);
+
+    static {
+        BUILDER.push("worldgen");
+    }
+
+    public static final ModConfigSpec.BooleanValue SPAWN_IN_VILLAGES = BUILDER
+            .comment("Whether the order board can generate as part of supported villages.")
+            .define("spawnInVillages", true);
+
+    public static final ModConfigSpec.DoubleValue VILLAGE_SPAWN_CHANCE_PERCENT = BUILDER
+            .comment(
+                    "Chance, in percent, that a supported village attempts to generate one order board.",
+                    "The jigsaw system can still reject the piece when terrain or available space does not fit."
+            )
+            .defineInRange("villageSpawnChancePercent", 50.0D, 0.0D, 100.0D);
+
+    static {
+        BUILDER.push("integrations");
+    }
+
+    public static final ModConfigSpec.BooleanValue TOWNS_AND_TOWERS_INTEGRATION = BUILDER
+            .comment("Enable optional Towns and Towers village integration when that mod is installed.")
+            .define("townsAndTowers", true);
+
+
+    public static final ModConfigSpec.BooleanValue REPURPOSED_STRUCTURES_INTEGRATION = BUILDER
+            .comment("Enable optional Repurposed Structures village integration when that mod is installed.")
+            .define("repurposedStructures", true);
+
+    static {
+        BUILDER.pop();
+    }
+
+    static {
+        BUILDER.pop();
+    }
 
     public static final ModConfigSpec SPEC = BUILDER.build();
 

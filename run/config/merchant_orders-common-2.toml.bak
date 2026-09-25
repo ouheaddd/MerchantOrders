@@ -11,9 +11,9 @@ terminalMaxUses = 1
 # Range: 1 ~ 20
 offersPerTier = 20
 #Minecraft days before a player's deterministic catalog changes.
-# Default: 7
+# Default: 6
 # Range: 1 ~ 365
-catalogRefreshDays = 7
+catalogRefreshDays = 6
 #Minecraft days before used offers restock.
 # Default: 3
 # Range: 1 ~ 365
@@ -22,3 +22,24 @@ restockDays = 3
 # Default: 64
 # Range: 1 ~ 256
 maximumShiftClickTrades = 64
+#Delay before a purchase sack appears beside the terminal.
+# Default: 200
+# Range: 1 ~ 72000
+purchaseDeliveryDelayTicks = 200
+#Delay before a payment sack appears beside the trade crate.
+# Default: 200
+# Range: 1 ~ 72000
+saleDeliveryDelayTicks = 200
+#Personal cooldown in Minecraft days between trade-crate sales.
+# Default: 3
+# Range: 1 ~ 365
+saleCooldownDays = 3
+
+[worldgen]
+	#Whether the order board can generate as part of supported villages.
+	spawnInVillages = true
+	#Chance, in percent, that a supported village attempts to generate one order board.
+	#The jigsaw system can still reject the piece when terrain or available space does not fit.
+	# Default: 25.0
+	# Range: 0.0 ~ 100.0
+	villageSpawnChancePercent = 50.0

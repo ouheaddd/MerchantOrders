@@ -1,0 +1,10 @@
+{
+  "target_structure": "repurposed_structures:village_swamp",
+  "pieces_spawn_counts": [
+    {
+      "nbt_piece_name": "merchant_orders:village/order_board",
+      "never_spawn_more_than_this_many": 1,
+      "condition": "merchant_orders:config"
+    }
+  ]
+}

@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -131,6 +133,34 @@ public final class OrderTerminalBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, HALF, RIGHT);
+    }
+
+    /**
+     * Structure templates/jigsaw pieces rotate block positions and then ask each
+     * block to rotate its own state. Because this block owns a custom FACING
+     * property (it does not extend HorizontalDirectionalBlock), the default
+     * Block implementation would leave FACING unchanged. That breaks the 2x2
+     * layout after a village piece is rotated: RIGHT/anchor calculations point
+     * to different cells than the cells that were actually rotated.
+     */
+    @Override
+    protected BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
+    /**
+     * Mirrors reverse handedness, so in addition to mirroring FACING the logical
+     * left/right half must be swapped. Jigsaw normally rotates our village piece,
+     * but keeping mirror support correct makes the template safe for other uses.
+     */
+    @Override
+    protected BlockState mirror(BlockState state, Mirror mirror) {
+        if (mirror == Mirror.NONE) {
+            return state;
+        }
+        return state
+                .setValue(FACING, mirror.mirror(state.getValue(FACING)))
+                .setValue(RIGHT, !state.getValue(RIGHT));
     }
 
     @Override

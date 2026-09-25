@@ -1,5 +1,5 @@
 #Emerald cost of the order terminal from a wandering trader.
-# Default: 24
+# Default: 48
 # Range: 1 ~ 64
 terminalPrice = 24
 #Maximum purchases of the terminal offer per wandering trader.
@@ -11,9 +11,9 @@ terminalMaxUses = 1
 # Range: 1 ~ 20
 offersPerTier = 20
 #Minecraft days before a player's deterministic catalog changes.
-# Default: 7
+# Default: 6
 # Range: 1 ~ 365
-catalogRefreshDays = 7
+catalogRefreshDays = 6
 #Minecraft days before used offers restock.
 # Default: 3
 # Range: 1 ~ 365
@@ -34,3 +34,24 @@ saleDeliveryDelayTicks = 200
 # Default: 3
 # Range: 1 ~ 365
 saleCooldownDays = 3
+
+[worldgen]
+	#Whether the order board can generate as part of supported villages.
+	spawnInVillages = true
+	#Chance, in percent, that a supported village attempts to generate one order board.
+	#The jigsaw system can still reject the piece when terrain or available space does not fit.
+	# Default: 50.0
+	# Range: 0.0 ~ 100.0
+	villageSpawnChancePercent = 50.0
+
+	[worldgen.integrations]
+		#Enable optional Towns and Towers village integration when that mod is installed.
+		townsAndTowers = true
+		#Enable optional ChoiceTheorem's Overhauled Village integration when CTOV is installed.
+		ctov = true
+		#Enable optional Repurposed Structures village integration when that mod is installed.
+		repurposedStructures = true
+		#Enable optional Integrated Villages integration when that mod is installed.
+		integratedVillages = true
+		#Enable optional Better Villages integration. Its normal villages are also covered through vanilla pools.
+		betterVillages = true

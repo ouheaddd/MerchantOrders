@@ -49,5 +49,9 @@
   "screen.merchant_orders.grade.normal": "Обычная партия",
   "screen.merchant_orders.grade.valuable": "Ценная партия",
   "screen.merchant_orders.grade.very_valuable": "Очень ценная партия",
-  "screen.merchant_orders.time_hours_minutes": "%s ч. %s мин."
+  "screen.merchant_orders.time_hours_minutes": "%s ч. %s мин.",
+  "item.merchant_orders.order_board_debug_stick": "Отладочная палка доски заказов",
+  "message.merchant_orders.debug_board.none": "Доска заказов не найдена в радиусе %s блоков.",
+  "message.merchant_orders.debug_board.found": "Найдено досок заказов: %s (радиус %s блоков):",
+  "message.merchant_orders.debug_board.position": "Доска заказов: X=%s Y=%s Z=%s (%s блоков)"
 }

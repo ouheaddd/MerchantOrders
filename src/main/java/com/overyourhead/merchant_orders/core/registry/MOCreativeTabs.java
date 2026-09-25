@@ -22,6 +22,7 @@ public final class MOCreativeTabs {
                         output.accept(MOBlocks.ORDER_TERMINAL_ITEM.get());
                         output.accept(MOBlocks.TRADE_CRATE_ITEM.get());
                         output.accept(MOBlocks.ORDER_SACK_ITEM.get());
+                        output.accept(MOItems.ORDER_BOARD_DEBUG_STICK.get());
                     })
                     .build()
     );

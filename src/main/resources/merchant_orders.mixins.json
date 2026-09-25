@@ -3,7 +3,11 @@
   "minVersion": "0.8",
   "package": "com.overyourhead.merchant_orders.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "JigsawPlacementPlacerMixin",
+    "SinglePoolElementAccessor",
+    "StructureTemplatePoolAccessor"
+  ],
   "client": [],
   "injectors": {
     "defaultRequire": 1
