@@ -1,4 +1,3 @@
-/locate structure minecraft:village_taiga
 /tp @s 39280 ~ 1696
 /locate structure minecraft:village_snowy
 /tp @s 39168 ~ 1168
@@ -48,3 +47,4 @@
 /tp @s -2432 ~ 2288
 /locate structure minecraft:village_taiga
 /tp @s -3184 ~ 1968
+/time set day

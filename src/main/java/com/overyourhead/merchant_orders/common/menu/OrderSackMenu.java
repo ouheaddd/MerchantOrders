@@ -56,16 +56,16 @@ public final class OrderSackMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < SACK_ROWS; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new SackSlot(container, column + row * 9, 8 + column * 18, 18 + row * 18));
+                addSlot(new SackSlot(container, column + row * 9, 9 + column * 18, 19 + row * 18));
             }
         }
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new LockedPlayerSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 104 + row * 18));
+                addSlot(new LockedPlayerSlot(playerInventory, column + row * 9 + 9, 10 + column * 18, 104 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new LockedPlayerSlot(playerInventory, column, 8 + column * 18, 162));
+            addSlot(new LockedPlayerSlot(playerInventory, column, 10 + column * 18, 162));
         }
     }
 

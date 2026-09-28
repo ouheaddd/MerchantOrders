@@ -40,15 +40,15 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private static final int TIER_GAP = 3;
 
     private static final int VISIBLE_ROWS = 8;
-    private static final int TRADE_X = 50;
+    private static final int TRADE_X = 52;
     private static final int TRADE_Y = 26;
     private static final int TRADE_W = 128;
     private static final int TRADE_H = 24;
 
     private static final int SCROLL_X = 180;
-    private static final int SCROLL_Y = 29;
+    private static final int SCROLL_Y = 26;
     private static final int SCROLL_W = 4;
-    private static final int SCROLL_H = 186;
+    private static final int SCROLL_H = 192;
     private static final int SCROLL_THUMB_H = 24;
 
     private static final int CURRENT_X = 196;
@@ -72,7 +72,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private static final int BUTTON_H = 22;
 
     private static final int XP_X = 196;
-    private static final int XP_Y = 17;
+    private static final int XP_Y = 19;
     private static final int XP_W = 176;
     private static final int XP_H = 7;
     private static final int XP_FILL_W = 174;
@@ -89,7 +89,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         super(menu, inventory, title);
         imageWidth = 380;
         imageHeight = 240;
-        titleLabelX = TRADE_X;
+        titleLabelX = 86;
         titleLabelY = 7;
         inventoryLabelX = -1000;
         inventoryLabelY = -1000;
@@ -185,7 +185,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             int uses = menu.uses(offer);
             int max = menu.maxUses(offer);
             int usesColor = uses >= max && max > 0 ? 0xFFFF6767 : 0xFFF0E7D8;
-            graphics.drawString(font, uses + "/" + max, left + 97, top + 7, usesColor, false);
+            graphics.drawString(font, uses + "/" + max, left + 93, top + 8, usesColor, false);
             if (uses >= max && max > 0) {
                 graphics.fill(left + 2, top + 2, left + TRADE_W - 2, top + TRADE_H - 2, 0x66000000);
             }
@@ -231,13 +231,13 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, titleLabelX, 8, 0xFF33271D, false);
+        graphics.drawString(font, title, titleLabelX, 10, 0xFF33271D, false);
         graphics.drawString(font, Component.translatable("screen.merchant_orders.tier." + menu.selectedTier()),
-                196, 8, 0xFF33271D, false);
+                196, 10, 0xFF33271D, false);
         String xpText = menu.xp() + " XP";
         graphics.drawString(font, xpText,
                 XP_X + XP_W - font.width(xpText),
-                8,
+                10,
                 0xFF33271D,
                 false);
 
