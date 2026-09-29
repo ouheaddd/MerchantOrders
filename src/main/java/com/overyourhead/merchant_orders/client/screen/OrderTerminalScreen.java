@@ -33,31 +33,31 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             gui("tier_0.png"), gui("tier_1.png"), gui("tier_2.png"), gui("tier_3.png"), gui("tier_4.png")
     };
 
-    private static final int TIER_X = 8;
+    private static final int TIER_X = 7;
     private static final int TIER_Y = 26;
     private static final int TIER_W = 38;
     private static final int TIER_H = 36;
     private static final int TIER_GAP = 3;
 
     private static final int VISIBLE_ROWS = 8;
-    private static final int TRADE_X = 52;
+    private static final int TRADE_X = 53;
     private static final int TRADE_Y = 26;
     private static final int TRADE_W = 128;
     private static final int TRADE_H = 24;
 
-    private static final int SCROLL_X = 180;
+    private static final int SCROLL_X = 181;
     private static final int SCROLL_Y = 26;
     private static final int SCROLL_W = 4;
     private static final int SCROLL_H = 192;
     private static final int SCROLL_THUMB_H = 24;
 
     private static final int CURRENT_X = 196;
-    private static final int CURRENT_Y = 29;
+    private static final int CURRENT_Y = 28;
     private static final int CURRENT_W = 103;
     private static final int CURRENT_H = 81;
 
     private static final int BASKET_X = 301;
-    private static final int BASKET_Y = 29;
+    private static final int BASKET_Y = 28;
     private static final int BASKET_W = 71;
     private static final int BASKET_H = 81;
 
@@ -67,7 +67,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private static final int BASKET_PREVIEW_SLOT_Y = 18;
 
     private static final int BUTTON_X = 196;
-    private static final int BUTTON_Y = 113;
+    private static final int BUTTON_Y = 111;
     private static final int BUTTON_W = 176;
     private static final int BUTTON_H = 22;
 
@@ -195,8 +195,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private void renderBasketCounters(GuiGraphics graphics) {
         int x = leftPos + BASKET_X;
         int y = topPos + BASKET_Y;
-        boolean hasOrder = menu.basketSlots() > 0;
-        int color = hasOrder ? 0xFF4A3828 : 0xFF8A8176;
+        int color = 0xFFF0D2A6;
 
         String slots = menu.basketSlots() + "/" + MOConstants.BASKET_SIZE;
         graphics.drawString(font, slots, x + 6, y + 68, color, false);
@@ -231,14 +230,14 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, titleLabelX, 10, 0xFF33271D, false);
+        graphics.drawString(font, title, titleLabelX, 10, 0xFFE1D7C5, false);
         graphics.drawString(font, Component.translatable("screen.merchant_orders.tier." + menu.selectedTier()),
-                196, 10, 0xFF33271D, false);
+                196, 10, 0xFFE1D7C5, false);
         String xpText = menu.xp() + " XP";
         graphics.drawString(font, xpText,
                 XP_X + XP_W - font.width(xpText),
                 10,
-                0xFF33271D,
+                0xFFE1D7C5,
                 false);
 
         Component currentTrade = Component.translatable("screen.merchant_orders.current_trade");
@@ -252,7 +251,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         graphics.drawString(font, basket,
                 BASKET_X + (BASKET_W - font.width(basket)) / 2,
                 BASKET_Y + 4,
-                0xFF443427,
+                0xFFF0D2A6,
                 false);
     }
 
@@ -393,7 +392,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             return true;
         }
 
-        if (x >= 274 && x < 292 && y >= 62 && y < 80) {
+        if (x >= 274 && x < 292 && y >= 61 && y < 79) {
             sendButton(Screen.hasShiftDown()
                     ? OrderTerminalMenu.BUTTON_EXECUTE_MAX
                     : OrderTerminalMenu.BUTTON_EXECUTE_ONE);

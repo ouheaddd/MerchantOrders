@@ -88,9 +88,9 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
             this.selectedTier = 0;
         }
 
-        addSlot(new PaymentSlot(payment, 0, 204, 62, true));
-        addSlot(new PaymentSlot(payment, 1, 224, 62, false));
-        addSlot(new ReadOnlySlot(result, 0, 274, 62));
+        addSlot(new PaymentSlot(payment, 0, 204, 61, true));
+        addSlot(new PaymentSlot(payment, 1, 224, 61, false));
+        addSlot(new ReadOnlySlot(result, 0, 274, 61));
 
         for (int i = 0; i < CATALOG_SLOT_COUNT; i++) {
             addSlot(new ReadOnlySlot(catalogSync, i, -1000, -1000));
@@ -108,11 +108,11 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory inventory) {
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 202 + column * 18, 143 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 204 + column * 18, 143 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 202 + column * 18, 201));
+            addSlot(new Slot(inventory, column, 204 + column * 18, 201));
         }
     }
 
