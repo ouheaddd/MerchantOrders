@@ -42,7 +42,9 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
     public static final int DATA_SELECTED_OFFER = 6;
     public static final int DATA_USES_BASE = 7;
     public static final int DATA_MAX_USES_BASE = DATA_USES_BASE + MOConstants.OFFERS_PER_TIER;
-    public static final int DATA_COUNT = DATA_MAX_USES_BASE + MOConstants.OFFERS_PER_TIER;
+    public static final int DATA_DELIVERY_PENDING = DATA_MAX_USES_BASE + MOConstants.OFFERS_PER_TIER;
+    public static final int DATA_XP_HIGH = DATA_DELIVERY_PENDING + 1;
+    public static final int DATA_COUNT = DATA_XP_HIGH + 1;
 
     public static final int PAYMENT_A_SLOT = 0;
     public static final int PAYMENT_B_SLOT = 1;
@@ -136,9 +138,11 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         trackedData.set(DATA_SELECTED_TIER, selectedTier);
         trackedData.set(DATA_SELECTED_OFFER, selectedOffer);
         trackedData.set(DATA_CATALOG_SIZE, catalog.size());
+        syncDeliveryState();
         if (orderData != null) {
             syncBasketContents();
-            trackedData.set(DATA_XP, orderData.xp());
+            trackedData.set(DATA_XP, orderData.xp() & 0xFFFF);
+            trackedData.set(DATA_XP_HIGH, (orderData.xp() >>> 16) & 0xFFFF);
             trackedData.set(DATA_UNLOCKED_TIER, MOConstants.unlockedTier(orderData.xp()));
             trackedData.set(DATA_BASKET_SLOTS, orderData.occupiedBasketSlots());
             trackedData.set(DATA_BASKET_ITEMS, orderData.basketItemCount());
@@ -149,6 +153,30 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
                 trackedData.set(DATA_MAX_USES_BASE + i, maxUses);
             }
         }
+    }
+
+    private void syncDeliveryState() {
+        access.execute((level, pos) -> {
+            if (level.getBlockEntity(pos) instanceof OrderTerminalBlockEntity terminal) {
+                trackedData.set(DATA_DELIVERY_PENDING, terminal.hasPendingDelivery() ? 1 : 0);
+            }
+        });
+    }
+
+    @Override
+    public void broadcastChanges() {
+        if (serverPlayer != null && orderData != null && serverPlayer.level() instanceof ServerLevel level) {
+            long cycle = level.getGameTime() / MOConfig.catalogRefreshTicks();
+            if (orderData.refreshCycle(cycle)) {
+                returnPaymentsToPlayer();
+                orderData.restockIfNeeded(level.getGameTime());
+                refreshCatalog();
+                updateResultPreview();
+                return;
+            }
+        }
+        syncDeliveryState();
+        super.broadcastChanges();
     }
 
     private void syncBasketContents() {
@@ -162,7 +190,7 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        if (serverPlayer == null || orderData == null || player != serverPlayer) {
+        if (serverPlayer == null || orderData == null || player != serverPlayer || !stillValid(player)) {
             return false;
         }
 
@@ -239,6 +267,15 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
             orderData.incrementUses(selectedTier, selectedOffer);
             orderData.addXp(trade.xp());
             executed++;
+        }
+
+        // A shift-buy refills at the start of each next iteration, so do not
+        // pre-load one extra payment after the batch has already finished.
+        // Keep the convenient prefill only for a normal single purchase.
+        if (executed > 0
+                && limit == 1
+                && orderData.uses(selectedTier, selectedOffer) < trade.maxUses()
+                && orderData.canFit(trade.result())) {
             refillPayment();
         }
 
@@ -361,7 +398,7 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
     }
 
     public int xp() {
-        return trackedData.get(DATA_XP);
+        return (trackedData.get(DATA_XP) & 0xFFFF) | ((trackedData.get(DATA_XP_HIGH) & 0xFFFF) << 16);
     }
 
     public int unlockedTier() {
@@ -374,6 +411,10 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
 
     public int basketItems() {
         return trackedData.get(DATA_BASKET_ITEMS);
+    }
+
+    public boolean deliveryPending() {
+        return trackedData.get(DATA_DELIVERY_PENDING) != 0;
     }
 
     public ItemStack getBasketItem(int slot) {

@@ -83,7 +83,7 @@ public final class PlayerOrderData {
     }
 
     public void addXp(int amount) {
-        xp = Math.max(0, xp + amount);
+        xp = (int) Math.min(Integer.MAX_VALUE, Math.max(0L, (long) xp + amount));
     }
 
     public int selectedTier() {
@@ -92,6 +92,16 @@ public final class PlayerOrderData {
 
     public void setSelectedTier(int selectedTier) {
         this.selectedTier = Math.max(0, Math.min(MOConstants.TIER_COUNT - 1, selectedTier));
+    }
+
+    public boolean refreshCycle(long currentCycle) {
+        if (catalogCycle == currentCycle) return false;
+        catalogCycle = currentCycle;
+        for (int tier = 0; tier < MOConstants.TIER_COUNT; tier++) {
+            java.util.Arrays.fill(uses[tier], 0);
+        }
+        save();
+        return true;
     }
 
     public long catalogCycle() {

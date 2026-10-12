@@ -207,7 +207,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private void renderOrderButton(GuiGraphics graphics, int mouseX, int mouseY) {
         int x = leftPos + BUTTON_X;
         int y = topPos + BUTTON_Y;
-        boolean enabled = menu.basketSlots() > 0;
+        boolean enabled = menu.basketSlots() > 0 && !menu.deliveryPending();
         boolean hovered = mouseX >= x && mouseX < x + BUTTON_W && mouseY >= y && mouseY < y + BUTTON_H;
         ResourceLocation texture = !enabled ? SEND_ORDER_DISABLED : (hovered ? SEND_ORDER_HOVER : SEND_ORDER);
         blit(graphics, texture, BUTTON_X, BUTTON_Y, BUTTON_W, BUTTON_H);
@@ -344,11 +344,12 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
 
         if (localX >= BUTTON_X && localX < BUTTON_X + BUTTON_W
                 && localY >= BUTTON_Y && localY < BUTTON_Y + BUTTON_H) {
-            graphics.renderTooltip(font,
-                    Component.translatable(menu.basketSlots() > 0
-                            ? "tooltip.merchant_orders.send_order"
-                            : "tooltip.merchant_orders.empty_basket"),
-                    mouseX, mouseY);
+            String tooltipKey = menu.deliveryPending()
+                    ? "message.merchant_orders.delivery_busy"
+                    : (menu.basketSlots() > 0
+                    ? "tooltip.merchant_orders.send_order"
+                    : "tooltip.merchant_orders.empty_basket");
+            graphics.renderTooltip(font, Component.translatable(tooltipKey), mouseX, mouseY);
             return;
         }
 
@@ -417,7 +418,9 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         }
 
         if (x >= BUTTON_X && x < BUTTON_X + BUTTON_W && y >= BUTTON_Y && y < BUTTON_Y + BUTTON_H) {
-            sendButton(OrderTerminalMenu.BUTTON_CLAIM);
+            if (menu.basketSlots() > 0 && !menu.deliveryPending()) {
+                sendButton(OrderTerminalMenu.BUTTON_CLAIM);
+            }
             return true;
         }
 

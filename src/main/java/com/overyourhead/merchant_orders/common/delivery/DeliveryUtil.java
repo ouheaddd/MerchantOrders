@@ -22,25 +22,27 @@ public final class DeliveryUtil {
     public static boolean placeSack(ServerLevel level, BlockPos origin, ItemStack sack) {
         BlockPos target = findPosition(level, origin, 3);
         if (target == null) {
-            level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(
+            return level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(
                     level,
                     origin.getX() + 0.5,
                     origin.getY() + 1.1,
                     origin.getZ() + 0.5,
                     sack.copy()
             ));
-            return true;
         }
 
         BlockState state = MOBlocks.ORDER_SACK.get().defaultBlockState();
         if (!level.setBlock(target, state, 3)) {
             return false;
         }
-        if (level.getBlockEntity(target) instanceof OrderSackBlockEntity blockEntity) {
-            ItemContainerContents contents = sack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-            contents.copyInto(blockEntity.getStoredItems());
-            blockEntity.setChanged();
+        if (!(level.getBlockEntity(target) instanceof OrderSackBlockEntity blockEntity)) {
+            // Do not consume a delivery unless the placed sack can actually store it.
+            level.removeBlock(target, false);
+            return false;
         }
+        ItemContainerContents contents = sack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+        contents.copyInto(blockEntity.getStoredItems());
+        blockEntity.setChanged();
         level.playSound(null, target, SoundEvents.WOOL_PLACE, net.minecraft.sounds.SoundSource.BLOCKS, 0.9F, 1.0F);
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,
                 target.getX() + 0.5, target.getY() + 0.8, target.getZ() + 0.5,
@@ -49,21 +51,24 @@ public final class DeliveryUtil {
     }
 
     private static BlockPos findPosition(ServerLevel level, BlockPos origin, int radius) {
-        for (int r = 1; r <= radius; r++) {
-            for (Direction direction : HORIZONTAL) {
-                BlockPos candidate = origin.relative(direction, r);
-                if (isValid(level, candidate)) {
-                    return candidate;
-                }
-            }
-            for (int dx = -r; dx <= r; dx++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    if (Math.abs(dx) != r && Math.abs(dz) != r) {
-                        continue;
-                    }
-                    BlockPos candidate = origin.offset(dx, 0, dz);
+        // Prefer the board's base level; only try one block higher when it is full.
+        for (int dy = 0; dy <= 1; dy++) {
+            for (int r = 1; r <= radius; r++) {
+                for (Direction direction : HORIZONTAL) {
+                    BlockPos candidate = origin.relative(direction, r).above(dy);
                     if (isValid(level, candidate)) {
                         return candidate;
+                    }
+                }
+                for (int dx = -r; dx <= r; dx++) {
+                    for (int dz = -r; dz <= r; dz++) {
+                        if (Math.abs(dx) != r && Math.abs(dz) != r) {
+                            continue;
+                        }
+                        BlockPos candidate = origin.offset(dx, dy, dz);
+                        if (isValid(level, candidate)) {
+                            return candidate;
+                        }
                     }
                 }
             }
@@ -72,6 +77,10 @@ public final class DeliveryUtil {
     }
 
     private static boolean isValid(ServerLevel level, BlockPos pos) {
+        if (!level.isInWorldBounds(pos) || !level.isInWorldBounds(pos.above())
+                || !level.hasChunkAt(pos) || !level.hasChunkAt(pos.below())) {
+            return false;
+        }
         return level.getBlockState(pos).canBeReplaced()
                 && level.getBlockState(pos.above()).canBeReplaced()
                 && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);

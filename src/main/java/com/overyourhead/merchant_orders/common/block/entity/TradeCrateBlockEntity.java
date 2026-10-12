@@ -85,6 +85,16 @@ public final class TradeCrateBlockEntity extends RandomizableContainerBlockEntit
         return true;
     }
 
+    public void dropPendingDelivery() {
+        if (pendingDelivery.isEmpty() || level == null || level.isClientSide) return;
+        net.minecraft.world.Containers.dropItemStack(level,
+                worldPosition.getX() + 0.5D, worldPosition.getY() + 0.5D,
+                worldPosition.getZ() + 0.5D, pendingDelivery.copy());
+        pendingDelivery = ItemStack.EMPTY;
+        deliveryTicks = 0;
+        setChanged();
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, TradeCrateBlockEntity blockEntity) {
         if (!(level instanceof ServerLevel serverLevel)) {
             return;

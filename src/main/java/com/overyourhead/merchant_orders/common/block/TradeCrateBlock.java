@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.Containers;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -52,6 +53,18 @@ public final class TradeCrateBlock extends BaseEntityBlock {
             return null;
         }
         return createTickerHelper(type, MOBlockEntities.TRADE_CRATE.get(), TradeCrateBlockEntity::serverTick);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!state.is(newState.getBlock()) && !level.isClientSide) {
+            if (level.getBlockEntity(pos) instanceof TradeCrateBlockEntity crate) {
+                Containers.dropContents(level, pos, crate);
+                crate.dropPendingDelivery();
+                level.updateNeighbourForOutputSignal(pos, this);
+            }
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override

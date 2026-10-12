@@ -36,7 +36,11 @@ public final class TradeCrateMenu extends AbstractContainerMenu {
     private static final int DATA_PENDING = 2;
     private static final int DATA_RARE = 3;
     private static final int DATA_OFFER_REFRESH = 4;
-    private static final int DATA_COUNT = 5;
+    private static final int DATA_VALUE_HIGH = 5;
+    private static final int DATA_COOLDOWN_HIGH = 6;
+    private static final int DATA_PENDING_HIGH = 7;
+    private static final int DATA_OFFER_REFRESH_HIGH = 8;
+    private static final int DATA_COUNT = 9;
 
     private final Container crate;
     private final SimpleContainer reward = new SimpleContainer(REWARD_SLOTS);
@@ -103,12 +107,22 @@ public final class TradeCrateMenu extends AbstractContainerMenu {
             reward.setItem(i, currentOffer.rewards().get(i).copy());
         }
         long remaining = PlayerSaleData.remainingCooldown(serverPlayer, level.getGameTime(), MOConfig.saleCooldownTicks());
-        data.set(DATA_VALUE, currentOffer.value());
-        data.set(DATA_COOLDOWN, (int) Math.min(Integer.MAX_VALUE, remaining));
-        data.set(DATA_PENDING, blockEntity == null ? 0 : blockEntity.deliveryTicks());
+        setWide(DATA_VALUE, DATA_VALUE_HIGH, currentOffer.value());
+        setWide(DATA_COOLDOWN, DATA_COOLDOWN_HIGH, remaining);
+        setWide(DATA_PENDING, DATA_PENDING_HIGH, blockEntity == null ? 0 : blockEntity.deliveryTicks());
         data.set(DATA_RARE, currentOffer.rare() ? 1 : 0);
-        data.set(DATA_OFFER_REFRESH, (int) Math.min(Integer.MAX_VALUE, 24000L - (level.getDayTime() % 24000L)));
+        setWide(DATA_OFFER_REFRESH, DATA_OFFER_REFRESH_HIGH, 24000L - Math.floorMod(level.getDayTime(), 24000L));
         broadcastChanges();
+    }
+
+    private void setWide(int low, int high, long value) {
+        int safe = (int) Math.max(0L, Math.min(Integer.MAX_VALUE, value));
+        data.set(low, safe & 0xFFFF);
+        data.set(high, (safe >>> 16) & 0xFFFF);
+    }
+
+    private int getWide(int low, int high) {
+        return (data.get(low) & 0xFFFF) | ((data.get(high) & 0xFFFF) << 16);
     }
 
     @Override
@@ -122,7 +136,7 @@ public final class TradeCrateMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        if (id != BUTTON_SELL || player != serverPlayer || serverPlayer == null
+        if (id != BUTTON_SELL || player != serverPlayer || !stillValid(player) || serverPlayer == null
                 || blockEntity == null || !(serverPlayer.level() instanceof ServerLevel level)) {
             return false;
         }
@@ -165,15 +179,15 @@ public final class TradeCrateMenu extends AbstractContainerMenu {
     }
 
     public int value() {
-        return data.get(DATA_VALUE);
+        return getWide(DATA_VALUE, DATA_VALUE_HIGH);
     }
 
     public int cooldownTicks() {
-        return data.get(DATA_COOLDOWN);
+        return getWide(DATA_COOLDOWN, DATA_COOLDOWN_HIGH);
     }
 
     public int pendingTicks() {
-        return data.get(DATA_PENDING);
+        return getWide(DATA_PENDING, DATA_PENDING_HIGH);
     }
 
     public boolean rareOffer() {
@@ -191,7 +205,7 @@ public final class TradeCrateMenu extends AbstractContainerMenu {
     }
 
     public int offerRefreshTicks() {
-        return data.get(DATA_OFFER_REFRESH);
+        return getWide(DATA_OFFER_REFRESH, DATA_OFFER_REFRESH_HIGH);
     }
 
     @Override
@@ -203,9 +217,9 @@ public final class TradeCrateMenu extends AbstractContainerMenu {
                 return;
             }
             long remaining = PlayerSaleData.remainingCooldown(serverPlayer, level.getGameTime(), MOConfig.saleCooldownTicks());
-            data.set(DATA_COOLDOWN, (int) Math.min(Integer.MAX_VALUE, remaining));
-            data.set(DATA_PENDING, blockEntity == null ? 0 : blockEntity.deliveryTicks());
-            data.set(DATA_OFFER_REFRESH, (int) Math.min(Integer.MAX_VALUE, 24000L - (level.getDayTime() % 24000L)));
+            setWide(DATA_COOLDOWN, DATA_COOLDOWN_HIGH, remaining);
+            setWide(DATA_PENDING, DATA_PENDING_HIGH, blockEntity == null ? 0 : blockEntity.deliveryTicks());
+            setWide(DATA_OFFER_REFRESH, DATA_OFFER_REFRESH_HIGH, 24000L - Math.floorMod(level.getDayTime(), 24000L));
         }
         super.broadcastChanges();
     }

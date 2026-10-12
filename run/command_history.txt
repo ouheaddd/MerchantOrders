@@ -1,12 +1,3 @@
-/tp @s 39280 ~ 1696
-/locate structure minecraft:village_snowy
-/tp @s 39168 ~ 1168
-/locate structure minecraft:village_savanna
-/tp @s 39472 ~ -896
-/locate structure minecraft:village_desert
-/tp @s -272 ~ -800
-/locate structure minecraft:village_plains
-/tp @s 0 ~ -1776
 /locate structure minecraft:village_savanna
 /tp @s 16 ~ -2960
 /locate structure minecraft:village_snowy
@@ -48,3 +39,12 @@
 /locate structure minecraft:village_taiga
 /tp @s -3184 ~ 1968
 /time set day
+/tick rate 100
+/tick rate 1000
+/tick rate 10000
+/tick rate 20
+/tick rate 10000
+/time set day
+/tick rate 20
+/tick rate 10000
+/tick rate 20
