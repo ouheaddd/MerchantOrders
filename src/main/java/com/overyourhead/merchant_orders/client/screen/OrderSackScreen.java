@@ -16,9 +16,12 @@ public final class OrderSackScreen extends AbstractContainerScreen<OrderSackMenu
 
     public OrderSackScreen(OrderSackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = 176;
-        imageHeight = 186;
-        inventoryLabelY = 92;
+        imageWidth = 187;
+        imageHeight = 223;
+        titleLabelX = -1000;
+        titleLabelY = -1000;
+        inventoryLabelX = -1000;
+        inventoryLabelY = -1000;
     }
 
     @Override
@@ -33,5 +36,9 @@ public final class OrderSackScreen extends AbstractContainerScreen<OrderSackMenu
         renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 }

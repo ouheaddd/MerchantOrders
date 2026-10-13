@@ -61,10 +61,10 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private static final int BASKET_W = 71;
     private static final int BASKET_H = 81;
 
-    private static final int BASKET_PREVIEW_W = 176;
-    private static final int BASKET_PREVIEW_H = 96;
-    private static final int BASKET_PREVIEW_SLOT_X = 8;
-    private static final int BASKET_PREVIEW_SLOT_Y = 18;
+    private static final int BASKET_PREVIEW_W = 187;
+    private static final int BASKET_PREVIEW_H = 130;
+    private static final int BASKET_PREVIEW_SLOT_X = 14;
+    private static final int BASKET_PREVIEW_SLOT_Y = 36;
 
     private static final int BUTTON_X = 196;
     private static final int BUTTON_Y = 111;
@@ -247,12 +247,6 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
                 0xFF443427,
                 false);
 
-        Component basket = Component.translatable("screen.merchant_orders.order_basket");
-        graphics.drawString(font, basket,
-                BASKET_X + (BASKET_W - font.width(basket)) / 2,
-                BASKET_Y + 4,
-                0xFFF0D2A6,
-                false);
     }
 
     @Override

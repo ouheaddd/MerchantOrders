@@ -1,6 +1,7 @@
 {
   "credit": "Made with Blockbench",
   "ambientocclusion": false,
+  "gui_light": "front",
   "textures": {
     "3": "merchant_orders:block/order_board",
     "particle": "minecraft:block/dark_oak_planks"

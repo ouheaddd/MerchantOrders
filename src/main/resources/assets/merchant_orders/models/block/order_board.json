@@ -1,6 +1,8 @@
 {
 	"format_version": "26.3",
 	"credit": "Made with Blockbench",
+	"ambientocclusion": false,
+	"gui_light": "front",
 	"texture_size": [128, 128],
 	"textures": {
 		"3": "order_board",

@@ -17,6 +17,12 @@ import org.jetbrains.annotations.Nullable;
 
 public final class OrderSackMenu extends AbstractContainerMenu {
     private static final int SACK_ROWS = 4;
+    private static final int SACK_SLOT_X = 14;
+    private static final int SACK_SLOT_Y = 37;
+    private static final int PLAYER_SLOT_X = 14;
+    private static final int PLAYER_SLOT_Y = 125;
+    private static final int HOTBAR_SLOT_X = 14;
+    private static final int HOTBAR_SLOT_Y = 183;
     private static final int PLAYER_SLOT_BASE = MOConstants.BASKET_SIZE;
     private final Container container;
     private final ContainerLevelAccess access;
@@ -56,16 +62,16 @@ public final class OrderSackMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < SACK_ROWS; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new SackSlot(container, column + row * 9, 9 + column * 18, 19 + row * 18));
+                addSlot(new SackSlot(container, column + row * 9, SACK_SLOT_X + column * 18, SACK_SLOT_Y + row * 18));
             }
         }
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new LockedPlayerSlot(playerInventory, column + row * 9 + 9, 10 + column * 18, 104 + row * 18));
+                addSlot(new LockedPlayerSlot(playerInventory, column + row * 9 + 9, PLAYER_SLOT_X + column * 18, PLAYER_SLOT_Y + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new LockedPlayerSlot(playerInventory, column, 10 + column * 18, 162));
+            addSlot(new LockedPlayerSlot(playerInventory, column, HOTBAR_SLOT_X + column * 18, HOTBAR_SLOT_Y));
         }
     }
 

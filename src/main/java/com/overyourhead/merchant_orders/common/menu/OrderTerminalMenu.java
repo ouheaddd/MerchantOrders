@@ -200,7 +200,6 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
                 returnPaymentsToPlayer();
                 selectedTier = tier;
                 orderData.setSelectedTier(tier);
-                orderData.save();
                 refreshCatalog();
                 return true;
             }
@@ -315,6 +314,7 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.merchant_orders.delivery_scheduled"), true);
         updateTrackedData();
         broadcastChanges();
+        serverPlayer.closeContainer();
         return true;
     }
 

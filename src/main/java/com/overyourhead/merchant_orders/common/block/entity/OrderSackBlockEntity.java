@@ -5,11 +5,13 @@ import com.overyourhead.merchant_orders.common.inventory.SackRules;
 import com.overyourhead.merchant_orders.common.menu.OrderSackMenu;
 import com.overyourhead.merchant_orders.core.registry.MOBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
@@ -77,9 +79,16 @@ public final class OrderSackBlockEntity extends RandomizableContainerBlockEntity
     }
 
     @Override
-    public void removeComponentsFromTag(CompoundTag tag) {
-        super.removeComponentsFromTag(tag);
-        tag.remove("Items");
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        ContainerHelper.saveAllItems(tag, items, registries);
+    }
+
+    @Override
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        items = NonNullList.withSize(MOConstants.BASKET_SIZE, ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(tag, items, registries);
     }
 
     @Override

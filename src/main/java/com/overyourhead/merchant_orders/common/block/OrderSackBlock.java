@@ -27,7 +27,7 @@ import java.util.List;
 
 public final class OrderSackBlock extends BaseEntityBlock {
     public static final MapCodec<OrderSackBlock> CODEC = simpleCodec(OrderSackBlock::new);
-    private static final VoxelShape SHAPE = box(2.0D, 0.0D, 2.0D, 14.0D, 12.0D, 14.0D);
+    private static final VoxelShape SHAPE = box(2.0D, 0.0D, 2.0D, 14.0D, 10.0D, 14.0D);
 
     public OrderSackBlock(Properties properties) {
         super(properties);

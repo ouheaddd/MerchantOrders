@@ -20,14 +20,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 public final class TradePoolRegistry {
     private static final List<List<TradeSource>> SOURCES = createTierLists();
     private static final int MAX_OFFERS_PER_PROFESSION = 4;
+    private static final int CATALOG_CACHE_LIMIT = 512;
+    private static final Map<CatalogKey, List<StoredTrade>> CATALOG_CACHE = new LinkedHashMap<>(64, 0.75F, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<CatalogKey, List<StoredTrade>> eldest) {
+            return size() > CATALOG_CACHE_LIMIT;
+        }
+    };
+    private static int sourceVersion;
 
     private static final List<String> COLOR_PREFIXES = List.of(
             "light_blue_",
@@ -82,6 +92,8 @@ public final class TradePoolRegistry {
                 SOURCES.get(level - 1).add(new TradeSource(profession, listing));
             }
         }
+        sourceVersion++;
+        CATALOG_CACHE.clear();
     }
 
     public static List<StoredTrade> createCatalog(ServerLevel level, ServerPlayer player, int tier, long cycle) {
@@ -89,8 +101,22 @@ public final class TradePoolRegistry {
             return List.of();
         }
 
+        int targetSize = MOConfig.OFFERS_PER_TIER.get();
+        long seed = level.getSeed()
+                ^ player.getUUID().getMostSignificantBits()
+                ^ Long.rotateLeft(player.getUUID().getLeastSignificantBits(), 17)
+                ^ (cycle * 0x9E3779B97F4A7C15L)
+                ^ ((long) tier * 0xD1B54A32D192ED03L);
+
         List<TradeSource> shuffled;
+        int capturedVersion;
         synchronized (TradePoolRegistry.class) {
+            capturedVersion = sourceVersion;
+            CatalogKey key = new CatalogKey(level.getSeed(), player.getUUID(), tier, cycle, targetSize, capturedVersion);
+            List<StoredTrade> cached = CATALOG_CACHE.get(key);
+            if (cached != null) {
+                return cached;
+            }
             shuffled = new ArrayList<>(SOURCES.get(tier));
         }
 
@@ -103,15 +129,8 @@ public final class TradePoolRegistry {
             return List.of();
         }
 
-        long seed = level.getSeed()
-                ^ player.getUUID().getMostSignificantBits()
-                ^ Long.rotateLeft(player.getUUID().getLeastSignificantBits(), 17)
-                ^ (cycle * 0x9E3779B97F4A7C15L)
-                ^ ((long) tier * 0xD1B54A32D192ED03L);
-
         Collections.shuffle(shuffled, new Random(seed));
 
-        int targetSize = MOConfig.OFFERS_PER_TIER.get();
         List<Candidate> candidates = buildCandidates(level, tier, seed, shuffled);
         List<StoredTrade> result = new ArrayList<>(Math.min(targetSize, candidates.size()));
         Set<String> usedFamilies = new HashSet<>();
@@ -161,7 +180,16 @@ public final class TradePoolRegistry {
             );
         }
 
-        return List.copyOf(result);
+        List<StoredTrade> catalog = List.copyOf(result);
+        synchronized (TradePoolRegistry.class) {
+            CatalogKey key = new CatalogKey(level.getSeed(), player.getUUID(), tier, cycle, targetSize, capturedVersion);
+            List<StoredTrade> cached = CATALOG_CACHE.get(key);
+            if (cached != null) {
+                return cached;
+            }
+            CATALOG_CACHE.put(key, catalog);
+        }
+        return catalog;
     }
 
     private static List<Candidate> buildCandidates(
@@ -314,6 +342,16 @@ public final class TradePoolRegistry {
     private record TradeSource(
             VillagerProfession profession,
             VillagerTrades.ItemListing listing
+    ) {
+    }
+
+    private record CatalogKey(
+            long levelSeed,
+            UUID playerId,
+            int tier,
+            long cycle,
+            int targetSize,
+            int sourceVersion
     ) {
     }
 
