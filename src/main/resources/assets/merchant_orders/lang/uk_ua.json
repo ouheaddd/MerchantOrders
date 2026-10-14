@@ -53,5 +53,6 @@
   "item.merchant_orders.order_board_debug_stick": "Налагоджувальна паличка дошки замовлень",
   "message.merchant_orders.debug_board.none": "Дошку замовлень не знайдено в радіусі %s блоків.",
   "message.merchant_orders.debug_board.found": "Знайдено дощок замовлень: %s (радіус %s блоків):",
-  "message.merchant_orders.debug_board.position": "Дошка замовлень: X=%s Y=%s Z=%s (%s блоків)"
+  "message.merchant_orders.debug_board.position": "Дошка замовлень: X=%s Y=%s Z=%s (%s блоків)",
+  "message.merchant_orders.market_preparing": "Дошка замовлень готує пропозиції. Спробуйте ще раз трохи пізніше."
 }

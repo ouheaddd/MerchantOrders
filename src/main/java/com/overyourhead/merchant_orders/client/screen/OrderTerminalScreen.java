@@ -6,8 +6,11 @@ import com.overyourhead.merchant_orders.common.menu.OrderTerminalMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -374,6 +377,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             if (mouseX < previewX || mouseX >= previewX + BASKET_PREVIEW_W
                     || mouseY < previewY || mouseY >= previewY + BASKET_PREVIEW_H) {
                 basketOpen = false;
+                playUiSound(SoundEvents.BARREL_CLOSE, 1.35F, 0.4F);
             }
             return true;
         }
@@ -384,6 +388,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         if (x >= BASKET_X && x < BASKET_X + BASKET_W
                 && y >= BASKET_Y && y < BASKET_Y + BASKET_H) {
             basketOpen = true;
+            playUiSound(SoundEvents.BARREL_OPEN, 1.35F, 0.4F);
             return true;
         }
 
@@ -397,6 +402,9 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         for (int tier = 0; tier < MOConstants.TIER_COUNT; tier++) {
             int tabY = TIER_Y + tier * (TIER_H + TIER_GAP);
             if (x >= TIER_X && x < TIER_X + TIER_W && y >= tabY && y < tabY + TIER_H) {
+                if (tier <= menu.unlockedTier() && tier != menu.selectedTier()) {
+                    playButtonClick();
+                }
                 sendButton(OrderTerminalMenu.BUTTON_TIER_BASE + tier);
                 return true;
             }
@@ -406,6 +414,9 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
                 && y >= TRADE_Y && y < TRADE_Y + VISIBLE_ROWS * TRADE_H) {
             int offer = scrollOffset + (y - TRADE_Y) / TRADE_H;
             if (offer < menu.catalogSize()) {
+                if (offer != menu.selectedOffer()) {
+                    playButtonClick();
+                }
                 sendButton(OrderTerminalMenu.BUTTON_OFFER_BASE + offer);
             }
             return true;
@@ -413,6 +424,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
 
         if (x >= BUTTON_X && x < BUTTON_X + BUTTON_W && y >= BUTTON_Y && y < BUTTON_Y + BUTTON_H) {
             if (menu.basketSlots() > 0 && !menu.deliveryPending()) {
+                playButtonClick();
                 sendButton(OrderTerminalMenu.BUTTON_CLAIM);
             }
             return true;
@@ -461,6 +473,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             if (keyCode == 256
                     || (minecraft != null && minecraft.options.keyInventory.matches(keyCode, scanCode))) {
                 basketOpen = false;
+                playUiSound(SoundEvents.BARREL_CLOSE, 1.35F, 0.4F);
             }
             // Consume every other key as well (hotbar swaps, drop key, etc.) so
             // the terminal underneath cannot be operated while the basket is open.
@@ -472,6 +485,18 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
     private void sendButton(int id) {
         if (minecraft != null && minecraft.gameMode != null) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, id);
+        }
+    }
+
+    private void playButtonClick() {
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        }
+    }
+
+    private void playUiSound(SoundEvent sound, float pitch, float volume) {
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, pitch, volume));
         }
     }
 }

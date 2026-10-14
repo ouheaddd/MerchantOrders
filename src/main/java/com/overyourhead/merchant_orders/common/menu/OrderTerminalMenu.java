@@ -3,15 +3,17 @@ package com.overyourhead.merchant_orders.common.menu;
 import com.overyourhead.merchant_orders.common.MOConstants;
 import com.overyourhead.merchant_orders.common.config.MOConfig;
 import com.overyourhead.merchant_orders.common.block.entity.OrderTerminalBlockEntity;
+import com.overyourhead.merchant_orders.common.event.CommonEvents;
 import com.overyourhead.merchant_orders.common.player.PlayerOrderData;
 import com.overyourhead.merchant_orders.common.trade.StoredTrade;
 import com.overyourhead.merchant_orders.common.trade.TradePoolRegistry;
 import com.overyourhead.merchant_orders.core.registry.MOBlocks;
 import com.overyourhead.merchant_orders.core.registry.MOMenuTypes;
-import com.overyourhead.merchant_orders.core.registry.MOSoundEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -68,6 +70,7 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
     private List<StoredTrade> catalog = List.of();
     private int selectedTier;
     private int selectedOffer = -1;
+    private int pendingTier = -1;
 
     public OrderTerminalMenu(int containerId, Inventory playerInventory) {
         this(containerId, playerInventory, ContainerLevelAccess.NULL);
@@ -85,6 +88,7 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
             this.orderData.restockIfNeeded(serverLevel.getGameTime());
             this.selectedTier = Math.min(orderData.selectedTier(), MOConstants.unlockedTier(orderData.xp()));
             refreshCatalog();
+            CommonEvents.queueCatalogWarmup(serverPlayer);
         } else {
             this.orderData = null;
             this.selectedTier = 0;
@@ -123,15 +127,19 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
             return;
         }
         catalog = TradePoolRegistry.createCatalog(level, serverPlayer, selectedTier, orderData.catalogCycle());
+        syncCatalogSlots();
+        selectedOffer = -1;
+        updateTrackedData();
+        broadcastChanges();
+    }
+
+    private void syncCatalogSlots() {
         for (int i = 0; i < MOConstants.OFFERS_PER_TIER; i++) {
             StoredTrade trade = i < catalog.size() ? catalog.get(i) : null;
             catalogSync.setItem(i, trade == null ? ItemStack.EMPTY : trade.costA().copy());
             catalogSync.setItem(MOConstants.OFFERS_PER_TIER + i, trade == null ? ItemStack.EMPTY : trade.costB().copy());
             catalogSync.setItem(MOConstants.OFFERS_PER_TIER * 2 + i, trade == null ? ItemStack.EMPTY : trade.result().copy());
         }
-        selectedOffer = -1;
-        updateTrackedData();
-        broadcastChanges();
     }
 
     private void updateTrackedData() {
@@ -168,15 +176,39 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         if (serverPlayer != null && orderData != null && serverPlayer.level() instanceof ServerLevel level) {
             long cycle = level.getGameTime() / MOConfig.catalogRefreshTicks();
             if (orderData.refreshCycle(cycle)) {
+                pendingTier = selectedTier;
                 returnPaymentsToPlayer();
                 orderData.restockIfNeeded(level.getGameTime());
-                refreshCatalog();
+                catalog = List.of();
+                selectedOffer = -1;
+                syncCatalogSlots();
                 updateResultPreview();
+                updateTrackedData();
+                CommonEvents.queueCatalogWarmup(serverPlayer, pendingTier);
+                return;
+            }
+            if (applyPendingTierIfReady(level)) {
                 return;
             }
         }
         syncDeliveryState();
         super.broadcastChanges();
+    }
+
+    private boolean applyPendingTierIfReady(ServerLevel level) {
+        if (pendingTier < 0
+                || pendingTier > MOConstants.unlockedTier(orderData.xp())
+                || !TradePoolRegistry.isCatalogCached(level, serverPlayer, pendingTier, orderData.catalogCycle())) {
+            return false;
+        }
+
+        returnPaymentsToPlayer();
+        selectedTier = pendingTier;
+        pendingTier = -1;
+        orderData.setSelectedTier(selectedTier);
+        refreshCatalog();
+        updateResultPreview();
+        return true;
     }
 
     private void syncBasketContents() {
@@ -197,13 +229,23 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         if (id >= BUTTON_TIER_BASE && id < BUTTON_TIER_BASE + MOConstants.TIER_COUNT) {
             int tier = id - BUTTON_TIER_BASE;
             if (tier <= MOConstants.unlockedTier(orderData.xp())) {
+                if (tier == selectedTier) {
+                    return true;
+                }
+                if (serverPlayer.level() instanceof ServerLevel level
+                        && !TradePoolRegistry.isCatalogCached(level, serverPlayer, tier, orderData.catalogCycle())) {
+                    pendingTier = tier;
+                    CommonEvents.queueCatalogWarmup(serverPlayer, tier);
+                    return true;
+                }
                 returnPaymentsToPlayer();
                 selectedTier = tier;
+                pendingTier = -1;
                 orderData.setSelectedTier(tier);
                 refreshCatalog();
                 return true;
             }
-            serverPlayer.playSound(SoundEvents.VILLAGER_NO, 0.8F, 1.0F);
+            playTerminalSound(SoundEvents.VILLAGER_NO, 0.8F, 1.0F);
             return false;
         }
 
@@ -280,9 +322,11 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
 
         if (executed > 0) {
             orderData.save();
-            serverPlayer.playSound(MOSoundEvents.ORDER_ADD.get(), 0.9F, 0.95F + serverPlayer.getRandom().nextFloat() * 0.1F);
+            playTerminalSound(SoundEvents.BUNDLE_INSERT, 0.9F, 0.95F + serverPlayer.getRandom().nextFloat() * 0.1F);
+            float xpPitch = 0.75F + serverPlayer.getRandom().nextFloat() * 0.45F + Math.min(executed - 1, 3) * 0.08F;
+            playTerminalSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.45F, xpPitch);
         } else {
-            serverPlayer.playSound(SoundEvents.VILLAGER_NO, 0.7F, 1.0F);
+            playTerminalSound(SoundEvents.VILLAGER_NO, 0.7F, 1.0F);
         }
         updateResultPreview();
         updateTrackedData();
@@ -304,13 +348,14 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         });
         if (!scheduled[0]) {
             serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.merchant_orders.delivery_busy"), true);
-            serverPlayer.playSound(SoundEvents.VILLAGER_NO, 0.7F, 1.0F);
+            playTerminalSound(SoundEvents.VILLAGER_NO, 0.7F, 1.0F);
             return false;
         }
 
         orderData.clearBasket();
         orderData.save();
-        serverPlayer.playSound(MOSoundEvents.ORDER_CLAIM.get(), 1.0F, 1.0F);
+        playTerminalSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.7F, 1.0F);
+        playTerminalSound(SoundEvents.VILLAGER_YES, 0.8F, 1.0F);
         serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.merchant_orders.delivery_scheduled"), true);
         updateTrackedData();
         broadcastChanges();
@@ -481,7 +526,16 @@ public final class OrderTerminalMenu extends AbstractContainerMenu {
         if (orderData != null) {
             orderData.save();
         }
+        if (serverPlayer != null && player == serverPlayer) {
+            playTerminalSound(SoundEvents.BARREL_CLOSE, 0.8F, 1.0F);
+        }
         super.removed(player);
+    }
+
+    private void playTerminalSound(SoundEvent sound, float volume, float pitch) {
+        if (serverPlayer != null) {
+            serverPlayer.playNotifySound(sound, SoundSource.PLAYERS, volume, pitch);
+        }
     }
 
     private final class PaymentSlot extends Slot {

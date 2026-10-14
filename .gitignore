@@ -1,6 +1,9 @@
 .gradle/
 build/
 runs/
+run/logs/
+run/saves/
+run/usercache.json
 out/
 .idea/
 *.iml

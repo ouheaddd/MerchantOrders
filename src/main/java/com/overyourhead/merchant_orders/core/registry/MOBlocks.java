@@ -56,7 +56,7 @@ public final class MOBlocks {
 
     public static final DeferredItem<OrderSackItem> ORDER_SACK_ITEM = MOItems.ITEMS.register(
             "order_sack",
-            () -> new OrderSackItem(ORDER_SACK.get(), new Item.Properties().stacksTo(1))
+            () -> new OrderSackItem(ORDER_SACK.get(), new Item.Properties().stacksTo(16))
     );
 
     private MOBlocks() {

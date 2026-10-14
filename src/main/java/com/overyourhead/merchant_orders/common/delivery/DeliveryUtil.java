@@ -4,11 +4,9 @@ import com.overyourhead.merchant_orders.common.block.entity.OrderSackBlockEntity
 import com.overyourhead.merchant_orders.core.registry.MOBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class DeliveryUtil {
@@ -40,8 +38,7 @@ public final class DeliveryUtil {
             level.removeBlock(target, false);
             return false;
         }
-        ItemContainerContents contents = sack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-        contents.copyInto(blockEntity.getStoredItems());
+        blockEntity.applyComponentsFromItemStack(sack);
         blockEntity.setChanged();
         level.playSound(null, target, SoundEvents.WOOL_PLACE, net.minecraft.sounds.SoundSource.BLOCKS, 0.9F, 1.0F);
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,

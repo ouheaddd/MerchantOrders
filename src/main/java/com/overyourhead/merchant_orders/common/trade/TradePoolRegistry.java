@@ -25,12 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 
 public final class TradePoolRegistry {
     private static final List<List<TradeSource>> SOURCES = createTierLists();
     private static final int MAX_OFFERS_PER_PROFESSION = 4;
+    private static final int CATALOG_SCAN_WINDOW = 160;
     private static final int CATALOG_CACHE_LIMIT = 512;
+    private static final long SLOW_CANDIDATE_LOG_NANOS = 50_000_000L;
+    private static final Set<TradeSource> SLOW_SOURCES = new HashSet<>();
     private static final Map<CatalogKey, List<StoredTrade>> CATALOG_CACHE = new LinkedHashMap<>(64, 0.75F, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<CatalogKey, List<StoredTrade>> eldest) {
@@ -94,17 +96,29 @@ public final class TradePoolRegistry {
         }
         sourceVersion++;
         CATALOG_CACHE.clear();
+        SLOW_SOURCES.clear();
     }
 
     public static List<StoredTrade> createCatalog(ServerLevel level, ServerPlayer player, int tier, long cycle) {
+        CatalogBuild build = beginCatalogBuild(level, tier, cycle);
+        while (!build.step(Integer.MAX_VALUE)) {
+            // Complete the synchronous request in one call. Background warmup
+            // uses the same builder with a small per-tick budget.
+        }
+        return build.catalog();
+    }
+
+    public static CatalogBuild beginCatalogBuild(ServerLevel level, ServerPlayer player, int tier, long cycle) {
+        return beginCatalogBuild(level, tier, cycle);
+    }
+
+    public static CatalogBuild beginCatalogBuild(ServerLevel level, int tier, long cycle) {
         if (tier < 0 || tier >= MOConstants.TIER_COUNT) {
-            return List.of();
+            return CatalogBuild.completed(List.of());
         }
 
         int targetSize = MOConfig.OFFERS_PER_TIER.get();
         long seed = level.getSeed()
-                ^ player.getUUID().getMostSignificantBits()
-                ^ Long.rotateLeft(player.getUUID().getLeastSignificantBits(), 17)
                 ^ (cycle * 0x9E3779B97F4A7C15L)
                 ^ ((long) tier * 0xD1B54A32D192ED03L);
 
@@ -112,10 +126,10 @@ public final class TradePoolRegistry {
         int capturedVersion;
         synchronized (TradePoolRegistry.class) {
             capturedVersion = sourceVersion;
-            CatalogKey key = new CatalogKey(level.getSeed(), player.getUUID(), tier, cycle, targetSize, capturedVersion);
+            CatalogKey key = new CatalogKey(level.getSeed(), tier, cycle, targetSize, capturedVersion);
             List<StoredTrade> cached = CATALOG_CACHE.get(key);
             if (cached != null) {
-                return cached;
+                return CatalogBuild.completed(cached);
             }
             shuffled = new ArrayList<>(SOURCES.get(tier));
         }
@@ -126,141 +140,151 @@ public final class TradePoolRegistry {
                             + "Check that TradePoolRegistry.capture is subscribed to VillagerTradesEvent.",
                     tier + 1
             );
-            return List.of();
+            return CatalogBuild.completed(List.of());
         }
 
         Collections.shuffle(shuffled, new Random(seed));
-
-        List<Candidate> candidates = buildCandidates(level, tier, seed, shuffled);
-        List<StoredTrade> result = new ArrayList<>(Math.min(targetSize, candidates.size()));
-        Set<String> usedFamilies = new HashSet<>();
-        Map<VillagerProfession, Integer> professionCounts = new HashMap<>();
-        Set<Integer> selectedCandidates = new HashSet<>();
-
-        // Pass 1: keep both diversity rules strict.
-        selectCandidates(
-                candidates,
-                result,
-                usedFamilies,
-                professionCounts,
-                selectedCandidates,
-                targetSize,
-                true,
-                true
-        );
-
-        // Pass 2: if the pool is small, relax only the profession cap while
-        // still guaranteeing one representative per color family.
-        if (result.size() < targetSize) {
-            selectCandidates(
-                    candidates,
-                    result,
-                    usedFamilies,
-                    professionCounts,
-                    selectedCandidates,
-                    targetSize,
-                    true,
-                    false
-            );
-        }
-
-        // Pass 3: last-resort fill. This keeps small/modded trade pools from
-        // producing a half-empty board. Exact duplicate definitions are still
-        // rejected, but family duplicates may appear only when necessary.
-        if (result.size() < targetSize) {
-            selectCandidates(
-                    candidates,
-                    result,
-                    usedFamilies,
-                    professionCounts,
-                    selectedCandidates,
-                    targetSize,
-                    false,
-                    false
-            );
-        }
-
-        List<StoredTrade> catalog = List.copyOf(result);
-        synchronized (TradePoolRegistry.class) {
-            CatalogKey key = new CatalogKey(level.getSeed(), player.getUUID(), tier, cycle, targetSize, capturedVersion);
-            List<StoredTrade> cached = CATALOG_CACHE.get(key);
-            if (cached != null) {
-                return cached;
-            }
-            CATALOG_CACHE.put(key, catalog);
-        }
-        return catalog;
+        CatalogKey key = new CatalogKey(level.getSeed(), tier, cycle, targetSize, capturedVersion);
+        return new CatalogBuild(key, level, tier, seed, shuffled, targetSize);
     }
 
-    private static List<Candidate> buildCandidates(
-            ServerLevel level,
+    public static boolean isCatalogCached(ServerLevel level, ServerPlayer player, int tier, long cycle) {
+        return isCatalogCached(level, tier, cycle);
+    }
+
+    public static boolean isCatalogCached(ServerLevel level, int tier, long cycle) {
+        if (tier < 0 || tier >= MOConstants.TIER_COUNT) {
+            return true;
+        }
+
+        int targetSize = MOConfig.OFFERS_PER_TIER.get();
+        synchronized (TradePoolRegistry.class) {
+            CatalogKey key = new CatalogKey(level.getSeed(), tier, cycle, targetSize, sourceVersion);
+            return CATALOG_CACHE.containsKey(key);
+        }
+    }
+
+    private static Candidate getCandidate(
+            List<TradeSource> sources,
+            Villager dummy,
             int tier,
             long seed,
-            List<TradeSource> shuffled
+            int index,
+            Map<Integer, Candidate> candidateCache,
+            Set<Integer> invalidCandidates
     ) {
-        List<Candidate> candidates = new ArrayList<>(shuffled.size());
-        Villager dummy = new Villager(EntityType.VILLAGER, level);
-        int attempt = 0;
+        if (invalidCandidates.contains(index)) {
+            return null;
+        }
 
-        for (TradeSource source : shuffled) {
-            try {
-                dummy.setVillagerData(
-                        dummy.getVillagerData()
-                                .setProfession(source.profession())
-                                .setLevel(tier + 1)
-                );
+        Candidate cached = candidateCache.get(index);
+        if (cached != null) {
+            return cached;
+        }
 
-                MerchantOffer offer = source.listing().getOffer(
-                        dummy,
-                        RandomSource.create(seed + (++attempt * 341873128712L))
-                );
+        TradeSource source = sources.get(index);
+        synchronized (TradePoolRegistry.class) {
+            if (SLOW_SOURCES.contains(source)) {
+                invalidCandidates.add(index);
+                return null;
+            }
+        }
+        if (isKnownSlowListing(source)) {
+            invalidCandidates.add(index);
+            return null;
+        }
 
-                if (offer == null) {
-                    continue;
+        long started = System.nanoTime();
+        try {
+            dummy.setVillagerData(
+                    dummy.getVillagerData()
+                            .setProfession(source.profession())
+                            .setLevel(tier + 1)
+            );
+
+            MerchantOffer offer = source.listing().getOffer(
+                    dummy,
+                    RandomSource.create(seed + ((long) (index + 1) * 341873128712L))
+            );
+
+            if (offer == null) {
+                invalidCandidates.add(index);
+                return null;
+            }
+
+            StoredTrade stored = new StoredTrade(
+                    offer.getCostA(),
+                    offer.getCostB(),
+                    offer.getResult(),
+                    offer.getMaxUses(),
+                    offer.getXp()
+            );
+
+            if (!stored.isValid()) {
+                invalidCandidates.add(index);
+                return null;
+            }
+
+            Candidate candidate = new Candidate(source.profession(), stored, colorFamilyKey(stored));
+            candidateCache.put(index, candidate);
+            return candidate;
+        } catch (Throwable throwable) {
+            invalidCandidates.add(index);
+            MerchantOrdersMod.LOGGER.debug(
+                    "Skipped incompatible trade from villager profession {}",
+                    source.profession().name(),
+                    throwable
+            );
+            return null;
+        } finally {
+            long elapsed = System.nanoTime() - started;
+            if (elapsed >= SLOW_CANDIDATE_LOG_NANOS) {
+                synchronized (TradePoolRegistry.class) {
+                    SLOW_SOURCES.add(source);
                 }
-
-                StoredTrade stored = new StoredTrade(
-                        offer.getCostA(),
-                        offer.getCostB(),
-                        offer.getResult(),
-                        offer.getMaxUses(),
-                        offer.getXp()
-                );
-
-                if (!stored.isValid()) {
-                    continue;
-                }
-
-                String familyKey = colorFamilyKey(stored);
-                candidates.add(new Candidate(source.profession(), stored, familyKey));
-            } catch (Throwable throwable) {
-                MerchantOrdersMod.LOGGER.debug(
-                        "Skipped incompatible trade from villager profession {}",
+                MerchantOrdersMod.LOGGER.warn(
+                        "Slow order catalog candidate disabled: tier={}, profession={}, index={}, listing={}, elapsed={}ms",
+                        tier + 1,
                         source.profession().name(),
-                        throwable
+                        index,
+                        source.listing().getClass().getName(),
+                        elapsed / 1_000_000L
                 );
             }
         }
+    }
 
-        return candidates;
+    private static boolean isKnownSlowListing(TradeSource source) {
+        String listingClass = source.listing().getClass().getName();
+        return listingClass.contains("TreasureMapForEmeralds")
+                || listingClass.contains("ExplorerMap");
     }
 
     private static void selectCandidates(
-            List<Candidate> candidates,
+            List<TradeSource> sources,
+            Villager dummy,
+            int tier,
+            long seed,
             List<StoredTrade> result,
             Set<String> usedFamilies,
             Map<VillagerProfession, Integer> professionCounts,
             Set<Integer> selectedCandidates,
+            Map<Integer, Candidate> candidateCache,
+            Set<Integer> invalidCandidates,
             int targetSize,
             boolean enforceFamilyLimit,
             boolean enforceProfessionLimit
     ) {
-        for (int i = 0; i < candidates.size() && result.size() < targetSize; i++) {
+        for (int i = 0; i < sources.size() && result.size() < targetSize; i++) {
             if (selectedCandidates.contains(i)) {
                 continue;
             }
 
-            Candidate candidate = candidates.get(i);
+            Candidate candidate = getCandidate(sources, dummy, tier, seed, i, candidateCache, invalidCandidates);
+            if (candidate == null) {
+                continue;
+            }
+
             StoredTrade stored = candidate.trade();
 
             if (result.stream().anyMatch(stored::sameDefinition)) {
@@ -285,6 +309,165 @@ public final class TradePoolRegistry {
             if (candidate.familyKey() != null) {
                 usedFamilies.add(candidate.familyKey());
             }
+        }
+    }
+
+    public static final class CatalogBuild {
+        private static final int STRICT_PASS = 0;
+        private static final int RELAX_PROFESSION_PASS = 1;
+        private static final int RELAX_ALL_PASS = 2;
+
+        private final CatalogKey key;
+        private final List<TradeSource> sources;
+        private final Villager dummy;
+        private final int tier;
+        private final long seed;
+        private final int targetSize;
+        private final List<StoredTrade> result;
+        private final Set<String> usedFamilies = new HashSet<>();
+        private final Map<VillagerProfession, Integer> professionCounts = new HashMap<>();
+        private final Set<Integer> selectedCandidates = new HashSet<>();
+        private final Map<Integer, Candidate> candidateCache = new HashMap<>();
+        private final Set<Integer> invalidCandidates = new HashSet<>();
+        private int pass;
+        private int index;
+        private int scanLimit;
+        private boolean done;
+        private List<StoredTrade> catalog = List.of();
+
+        private CatalogBuild(
+                CatalogKey key,
+                ServerLevel level,
+                int tier,
+                long seed,
+                List<TradeSource> sources,
+                int targetSize
+        ) {
+            this.key = key;
+            this.sources = sources;
+            this.dummy = new Villager(EntityType.VILLAGER, level);
+            this.tier = tier;
+            this.seed = seed;
+            this.targetSize = targetSize;
+            this.result = new ArrayList<>(Math.min(targetSize, sources.size()));
+            this.scanLimit = Math.min(sources.size(), Math.max(targetSize * 8, CATALOG_SCAN_WINDOW));
+        }
+
+        private CatalogBuild(List<StoredTrade> catalog) {
+            this.key = null;
+            this.sources = List.of();
+            this.dummy = null;
+            this.tier = 0;
+            this.seed = 0L;
+            this.targetSize = 0;
+            this.result = new ArrayList<>();
+            this.scanLimit = 0;
+            this.done = true;
+            this.catalog = catalog;
+        }
+
+        private static CatalogBuild completed(List<StoredTrade> catalog) {
+            return new CatalogBuild(catalog);
+        }
+
+        public boolean step(int maxCandidates) {
+            return step(maxCandidates, Long.MAX_VALUE);
+        }
+
+        public boolean step(int maxCandidates, long maxNanos) {
+            if (done) {
+                return true;
+            }
+
+            long deadline = maxNanos == Long.MAX_VALUE ? Long.MAX_VALUE : System.nanoTime() + maxNanos;
+            int processed = 0;
+            while (processed < maxCandidates && !done && System.nanoTime() < deadline) {
+                if (result.size() >= targetSize) {
+                    finish();
+                    break;
+                }
+
+                if (index >= scanLimit) {
+                    pass++;
+                    if (pass > RELAX_ALL_PASS) {
+                        if (scanLimit >= sources.size()) {
+                            finish();
+                            break;
+                        }
+                        int previousLimit = scanLimit;
+                        this.scanLimit = Math.min(sources.size(), scanLimit + CATALOG_SCAN_WINDOW);
+                        index = previousLimit;
+                        pass = STRICT_PASS;
+                    } else {
+                        index = 0;
+                    }
+                    continue;
+                }
+
+                int candidateIndex = index++;
+                processed++;
+                if (selectedCandidates.contains(candidateIndex)) {
+                    continue;
+                }
+
+                Candidate candidate = getCandidate(
+                        sources,
+                        dummy,
+                        tier,
+                        seed,
+                        candidateIndex,
+                        candidateCache,
+                        invalidCandidates
+                );
+                if (candidate == null) {
+                    continue;
+                }
+
+                StoredTrade stored = candidate.trade();
+                if (result.stream().anyMatch(stored::sameDefinition)) {
+                    selectedCandidates.add(candidateIndex);
+                    continue;
+                }
+
+                boolean enforceFamilyLimit = pass == STRICT_PASS || pass == RELAX_PROFESSION_PASS;
+                if (enforceFamilyLimit
+                        && candidate.familyKey() != null
+                        && usedFamilies.contains(candidate.familyKey())) {
+                    continue;
+                }
+
+                int professionCount = professionCounts.getOrDefault(candidate.profession(), 0);
+                if (pass == STRICT_PASS && professionCount >= MAX_OFFERS_PER_PROFESSION) {
+                    continue;
+                }
+
+                result.add(stored);
+                selectedCandidates.add(candidateIndex);
+                professionCounts.put(candidate.profession(), professionCount + 1);
+                if (candidate.familyKey() != null) {
+                    usedFamilies.add(candidate.familyKey());
+                }
+            }
+
+            return done;
+        }
+
+        public List<StoredTrade> catalog() {
+            return catalog;
+        }
+
+        private void finish() {
+            List<StoredTrade> completed = List.copyOf(result);
+            synchronized (TradePoolRegistry.class) {
+                List<StoredTrade> cached = CATALOG_CACHE.get(key);
+                if (cached != null) {
+                    catalog = cached;
+                } else {
+                    CATALOG_CACHE.put(key, completed);
+                    catalog = completed;
+                }
+            }
+            done = true;
         }
     }
 
@@ -347,7 +530,6 @@ public final class TradePoolRegistry {
 
     private record CatalogKey(
             long levelSeed,
-            UUID playerId,
             int tier,
             long cycle,
             int targetSize,

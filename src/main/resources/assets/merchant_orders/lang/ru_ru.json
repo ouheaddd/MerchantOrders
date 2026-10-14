@@ -53,5 +53,6 @@
   "item.merchant_orders.order_board_debug_stick": "Отладочная палка доски заказов",
   "message.merchant_orders.debug_board.none": "Доска заказов не найдена в радиусе %s блоков.",
   "message.merchant_orders.debug_board.found": "Найдено досок заказов: %s (радиус %s блоков):",
-  "message.merchant_orders.debug_board.position": "Доска заказов: X=%s Y=%s Z=%s (%s блоков)"
+  "message.merchant_orders.debug_board.position": "Доска заказов: X=%s Y=%s Z=%s (%s блоков)",
+  "message.merchant_orders.market_preparing": "Доска заказов готовит предложения. Попробуйте еще раз немного позже."
 }
