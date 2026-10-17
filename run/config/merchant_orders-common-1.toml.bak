@@ -47,11 +47,5 @@ saleCooldownDays = 3
 	[worldgen.integrations]
 		#Enable optional Towns and Towers village integration when that mod is installed.
 		townsAndTowers = true
-		#Enable optional ChoiceTheorem's Overhauled Village integration when CTOV is installed.
-		ctov = true
 		#Enable optional Repurposed Structures village integration when that mod is installed.
 		repurposedStructures = true
-		#Enable optional Integrated Villages integration when that mod is installed.
-		integratedVillages = true
-		#Enable optional Better Villages integration. Its normal villages are also covered through vanilla pools.
-		betterVillages = true

@@ -11,7 +11,7 @@ terminalMaxUses = 1
 # Range: 1 ~ 20
 offersPerTier = 20
 #Minecraft days before a player's deterministic catalog changes.
-# Default: 7
+# Default: 6
 # Range: 1 ~ 365
 catalogRefreshDays = 7
 #Minecraft days before used offers restock.

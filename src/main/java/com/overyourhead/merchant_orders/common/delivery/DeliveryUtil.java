@@ -2,6 +2,7 @@ package com.overyourhead.merchant_orders.common.delivery;
 
 import com.overyourhead.merchant_orders.common.block.entity.OrderSackBlockEntity;
 import com.overyourhead.merchant_orders.core.registry.MOBlocks;
+import com.overyourhead.merchant_orders.core.registry.MOSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,11 @@ public final class DeliveryUtil {
     };
 
     private DeliveryUtil() {
+    }
+
+    public static void playIncomingSound(ServerLevel level, BlockPos origin) {
+        level.playSound(null, origin, MOSoundEvents.DELIVERY_INCOMING.get(),
+                net.minecraft.sounds.SoundSource.BLOCKS, 0.2F, 1.0F);
     }
 
     public static boolean placeSack(ServerLevel level, BlockPos origin, ItemStack sack) {

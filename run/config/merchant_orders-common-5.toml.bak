@@ -22,3 +22,15 @@ restockDays = 3
 # Default: 64
 # Range: 1 ~ 256
 maximumShiftClickTrades = 64
+#Delay before a purchase sack appears beside the terminal.
+# Default: 200
+# Range: 1 ~ 72000
+purchaseDeliveryDelayTicks = 200
+#Delay before a payment sack appears beside the trade crate.
+# Default: 200
+# Range: 1 ~ 72000
+saleDeliveryDelayTicks = 200
+#Personal cooldown in Minecraft days between trade-crate sales.
+# Default: 3
+# Range: 1 ~ 365
+saleCooldownDays = 3

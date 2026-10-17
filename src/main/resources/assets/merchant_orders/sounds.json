@@ -10,5 +10,22 @@
     "sounds": [
       "merchant_orders:ui/order_claim"
     ]
+  },
+  "bag.open": {
+    "sounds": [
+      "merchant_orders:bag/zipper"
+    ]
+  },
+  "bag.close": {
+    "sounds": [
+      "merchant_orders:bag/zipper"
+    ]
+  },
+  "delivery.incoming": {
+    "sounds": [
+      "merchant_orders:delivery/incoming_1",
+      "merchant_orders:delivery/incoming_2",
+      "merchant_orders:delivery/incoming_3"
+    ]
   }
 }

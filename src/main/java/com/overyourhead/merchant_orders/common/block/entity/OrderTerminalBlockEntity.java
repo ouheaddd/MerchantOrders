@@ -81,8 +81,13 @@ public final class OrderTerminalBlockEntity extends BlockEntity implements MenuP
         }
         if (blockEntity.deliveryTicks > 0) {
             blockEntity.deliveryTicks--;
+            if (blockEntity.deliveryTicks == 40) {
+                DeliveryUtil.playIncomingSound(serverLevel, pos);
+            }
             blockEntity.setChanged();
-            return;
+            if (blockEntity.deliveryTicks > 0) {
+                return;
+            }
         }
         if (DeliveryUtil.placeSack(serverLevel, pos, blockEntity.pendingDelivery)) {
             blockEntity.pendingDelivery = ItemStack.EMPTY;

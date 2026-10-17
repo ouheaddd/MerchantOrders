@@ -3,6 +3,7 @@ package com.overyourhead.merchant_orders.client.screen;
 import com.overyourhead.merchant_orders.MerchantOrdersMod;
 import com.overyourhead.merchant_orders.common.MOConstants;
 import com.overyourhead.merchant_orders.common.menu.OrderTerminalMenu;
+import com.overyourhead.merchant_orders.core.registry.MOSoundEvents;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -377,7 +378,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             if (mouseX < previewX || mouseX >= previewX + BASKET_PREVIEW_W
                     || mouseY < previewY || mouseY >= previewY + BASKET_PREVIEW_H) {
                 basketOpen = false;
-                playUiSound(SoundEvents.BARREL_CLOSE, 1.35F, 0.4F);
+                playUiSound(MOSoundEvents.BAG_CLOSE.get(), 0.9F, 0.2F);
             }
             return true;
         }
@@ -388,7 +389,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         if (x >= BASKET_X && x < BASKET_X + BASKET_W
                 && y >= BASKET_Y && y < BASKET_Y + BASKET_H) {
             basketOpen = true;
-            playUiSound(SoundEvents.BARREL_OPEN, 1.35F, 0.4F);
+            playUiSound(MOSoundEvents.BAG_OPEN.get(), 1.1F, 0.2F);
             return true;
         }
 
@@ -473,7 +474,7 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
             if (keyCode == 256
                     || (minecraft != null && minecraft.options.keyInventory.matches(keyCode, scanCode))) {
                 basketOpen = false;
-                playUiSound(SoundEvents.BARREL_CLOSE, 1.35F, 0.4F);
+                playUiSound(MOSoundEvents.BAG_CLOSE.get(), 0.9F, 0.2F);
             }
             // Consume every other key as well (hotbar swaps, drop key, etc.) so
             // the terminal underneath cannot be operated while the basket is open.
@@ -486,6 +487,15 @@ public final class OrderTerminalScreen extends AbstractContainerScreen<OrderTerm
         if (minecraft != null && minecraft.gameMode != null) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, id);
         }
+    }
+
+    @Override
+    public void removed() {
+        if (basketOpen) {
+            basketOpen = false;
+            playUiSound(MOSoundEvents.BAG_CLOSE.get(), 0.9F, 0.2F);
+        }
+        super.removed();
     }
 
     private void playButtonClick() {

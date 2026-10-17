@@ -35,13 +35,13 @@ public final class MOConfig {
             .comment("Safety cap for one shift-click batch purchase.")
             .defineInRange("maximumShiftClickTrades", 64, 1, 256);
 
-    public static final ModConfigSpec.IntValue PURCHASE_DELIVERY_DELAY_TICKS = BUILDER
-            .comment("Delay before a purchase sack appears beside the terminal.")
-            .defineInRange("purchaseDeliveryDelayTicks", 200, 1, 72_000);
+    public static final ModConfigSpec.IntValue DELIVERY_MIN_SECONDS = BUILDER
+            .comment("Minimum random delivery delay in seconds, for purchases and sale payments.")
+            .defineInRange("deliveryMinSeconds", 5, 3, 3600);
 
-    public static final ModConfigSpec.IntValue SALE_DELIVERY_DELAY_TICKS = BUILDER
-            .comment("Delay before a payment sack appears beside the trade crate.")
-            .defineInRange("saleDeliveryDelayTicks", 200, 1, 72_000);
+    public static final ModConfigSpec.IntValue DELIVERY_MAX_SECONDS = BUILDER
+            .comment("Maximum random delivery delay in seconds. Reversed bounds are accepted.")
+            .defineInRange("deliveryMaxSeconds", 15, 3, 3600);
 
     public static final ModConfigSpec.IntValue SALE_COOLDOWN_DAYS = BUILDER
             .comment("Personal cooldown in Minecraft days between trade-crate sales.")
@@ -97,11 +97,17 @@ public final class MOConfig {
     }
 
     public static int purchaseDeliveryDelayTicks() {
-        return PURCHASE_DELIVERY_DELAY_TICKS.get();
+        return randomDeliveryDelayTicks();
     }
 
     public static int saleDeliveryDelayTicks() {
-        return SALE_DELIVERY_DELAY_TICKS.get();
+        return randomDeliveryDelayTicks();
+    }
+
+    private static int randomDeliveryDelayTicks() {
+        int min = Math.min(DELIVERY_MIN_SECONDS.get(), DELIVERY_MAX_SECONDS.get());
+        int max = Math.max(DELIVERY_MIN_SECONDS.get(), DELIVERY_MAX_SECONDS.get());
+        return java.util.concurrent.ThreadLocalRandom.current().nextInt(min, max + 1) * 20;
     }
 
     public static long saleCooldownTicks() {

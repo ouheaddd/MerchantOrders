@@ -11,6 +11,7 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -89,6 +90,23 @@ public final class OrderSackBlockEntity extends RandomizableContainerBlockEntity
         super.loadAdditional(tag, registries);
         items = NonNullList.withSize(MOConstants.BASKET_SIZE, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(tag, items, registries);
+    }
+
+    // Send the name to the renderer when a player joins or reloads the chunk.
+    // Inventory contents are synchronized separately through the menu.
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        Component name = getCustomName();
+        if (name != null) {
+            tag.putString("CustomName", Component.Serializer.toJson(name, registries));
+        }
+        return tag;
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override

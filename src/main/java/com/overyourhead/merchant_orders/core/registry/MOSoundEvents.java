@@ -15,6 +15,11 @@ public final class MOSoundEvents {
     public static final DeferredHolder<SoundEvent, SoundEvent> ORDER_ADD = register("ui.order_add");
     public static final DeferredHolder<SoundEvent, SoundEvent> ORDER_CLAIM = register("ui.order_claim");
 
+    public static final DeferredHolder<SoundEvent, SoundEvent> BAG_OPEN = register("bag.open");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BAG_CLOSE = register("bag.close");
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> DELIVERY_INCOMING = register("delivery.incoming");
+
     private MOSoundEvents() {
     }
 

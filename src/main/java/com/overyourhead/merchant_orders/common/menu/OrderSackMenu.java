@@ -5,6 +5,9 @@ import com.overyourhead.merchant_orders.common.inventory.SackItemContainer;
 import com.overyourhead.merchant_orders.common.inventory.SackRules;
 import com.overyourhead.merchant_orders.core.registry.MOBlocks;
 import com.overyourhead.merchant_orders.core.registry.MOMenuTypes;
+import com.overyourhead.merchant_orders.core.registry.MOSoundEvents;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -59,6 +62,7 @@ public final class OrderSackMenu extends AbstractContainerMenu {
         this.lockedSackStack = lockedSackStack;
         checkContainerSize(container, MOConstants.BASKET_SIZE);
         container.startOpen(playerInventory.player);
+        playBagSound(playerInventory.player, MOSoundEvents.BAG_OPEN.get(), 1.1F);
 
         for (int row = 0; row < SACK_ROWS; row++) {
             for (int column = 0; column < 9; column++) {
@@ -126,7 +130,19 @@ public final class OrderSackMenu extends AbstractContainerMenu {
     @Override
     public void removed(Player player) {
         container.stopOpen(player);
+        playBagSound(player, MOSoundEvents.BAG_CLOSE.get(), 0.9F);
         super.removed(player);
+    }
+
+    private void playBagSound(Player player, SoundEvent sound, float pitch) {
+        if (player.level().isClientSide) {
+            return;
+        }
+        if (itemBacked) {
+            player.level().playSound(null, player.blockPosition(), sound, SoundSource.PLAYERS, 0.2F, pitch);
+        } else {
+            access.execute((level, pos) -> level.playSound(null, pos, sound, SoundSource.BLOCKS, 0.2F, pitch));
+        }
     }
 
     private final class LockedPlayerSlot extends Slot {

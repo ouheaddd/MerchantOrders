@@ -104,8 +104,13 @@ public final class TradeCrateBlockEntity extends RandomizableContainerBlockEntit
         }
         if (blockEntity.deliveryTicks > 0) {
             blockEntity.deliveryTicks--;
+            if (blockEntity.deliveryTicks == 40) {
+                DeliveryUtil.playIncomingSound(serverLevel, pos);
+            }
             blockEntity.setChanged();
-            return;
+            if (blockEntity.deliveryTicks > 0) {
+                return;
+            }
         }
         if (DeliveryUtil.placeSack(serverLevel, pos, blockEntity.pendingDelivery)) {
             blockEntity.pendingDelivery = ItemStack.EMPTY;
